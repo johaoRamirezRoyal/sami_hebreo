@@ -1,10 +1,4 @@
 <?php
-/*
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-session_start();
-*/
 require_once CONTROL_PATH . 'Session.php';
 $objss = new Session;
 $objss->iniciar();
@@ -35,7 +29,7 @@ if (isset($_POST['buscar'])) {
     $datos            = array('area' => $_POST['area'], 'usuario' => $_POST['usuario'], 'buscar' => $_POST['buscar']);
     $datos_inventario = $instancia->mostrarDatosEquipoComputoControl($datos);
 } else {
-    $datos_inventario = $instancia->mostrarEquipoComputoControl();
+    $datos_inventario = $instancia->mostrarEquiposEnMantenimientoPreventivoControl();
 }
 
 $permisos = $instancia_permiso->permisosUsuarioControl(10, $perfil_log);
@@ -96,50 +90,7 @@ if (!$permisos) {
                     -->
                 </div>
                 <div class="card-body">
-                    <form method="POST">
-                        <div class="row">
-                            <div class="col-lg-4 form-group">
-                                <select class="form-control" name="area" data-tooltip="tooltip" title="Area" data-trigger="hover" data-placement="bottom">
-                                    <option value="" selected>Seleccione una area...</option>
-                                    <?php
-                                    foreach ($datos_areas as $areas) {
-                                        $id_area  = $areas['id'];
-                                        $nom_area = $areas['nombre'];
-                                    ?>
-                                        <option value="<?= $id_area ?>"><?= $nom_area ?></option>
-                                    <?php
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                            <div class="col-lg-4 form-group">
-                                <select class="form-control" name="usuario" data-tooltip="tooltip" title="Usuario" data-trigger="hover" data-placement="bottom">
-                                    <option value="" selected>Seleccione un usuario...</option>
-                                    <?php
-                                    foreach ($datos_usuario as $usuario) {
-                                        $id_usuario  = $usuario['id_user'];
-                                        $nom_usuario = $usuario['nombre'] . ' ' . $usuario['apellido'];
-                                    ?>
-                                        <option value="<?= $id_usuario ?>"><?= $nom_usuario ?></option>
-                                    <?php
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                            <div class="col-lg-4 form-group">
-                                <div class="input-group mb-3">
-                                    <input type="text" class="form-control filtro" name="buscar" placeholder="Buscar..." aria-describedby="basic-addon2">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-primary btn-sm" type="submit">
-                                            <i class="fa fa-search"></i>
-                                            &nbsp;
-                                            Buscar
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                    
                     <div class="table-responsive mt-2">
                         <table class="table table-hover text-uppercase border table-sm" width="100%" cellspacing="0">
                             <thead>
@@ -151,33 +102,25 @@ if (!$permisos) {
                                     <th scope="col">Marca</th>
                                     <th scope="col">Modelo</th>
                                     <th scope="col">Codigo</th>
-                                    <th scope="col">Frecuencia mantenimiento</th>
-                                    <th scope="col">Frecuencia copia de seguridad</th>
-                                    <th scope="col">Fecha proximo mantenimiento</th>
+                                    <th scope="col">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="buscar text-uppercase">
                                 <?php
                                 foreach ($datos_inventario as $inventario) {
-                                    $id_inventario    = $inventario['id'];
+                                    $id_inventario    = $inventario['id_inventario'];
+                                    $id_reporte       = $inventario['id']; 
                                     $descripcion      = $inventario['descripcion'];
                                     $marca            = $inventario['marca'];
                                     $modelo           = $inventario['modelo'];
                                     $codigo           = ($inventario['codigo'] == '') ? $id_inventario : $inventario['codigo'];
-                                    $usuario          = $inventario['usuario'];
+                                    $usuario          = $inventario['nom_user'];
                                     $area             = $inventario['nom_area'];
                                     $estado           = $inventario['estado'];
                                     $observacion      = $inventario['observacion'];
                                     $id_user          = $inventario['id_user'];
                                     $id_area          = $inventario['id_area'];
                                     $id_categoria     = $inventario['id_categoria'];
-                                    $frecuencia       = $inventario['frecuencia'];
-                                    $frecuencia_copia = $inventario['frecuencia_copia'];
-
-                                    $fecha = new DateTime($inventario['ultimo_mant']);
-                                    $fecha->modify("+{$frecuencia} months");
-
-                                    $nuevafecha = $fecha->format('Y-m');
 
                                     /*
                                     $fecha      = date('Y-m', strtotime($inventario['ultimo_mant']));
@@ -208,19 +151,21 @@ if (!$permisos) {
                                             <td><?= $marca ?></td>
                                             <td><?= $modelo ?></td>
                                             <td><?= $codigo ?></td>
-                                            <td><?= $frecuencia ?> Meses</td>
-                                            <td><?= $frecuencia_copia ?> Meses</td>
-                                            <td><?= $nuevafecha ?></td>
                                             <td>
                                                 <div class="btn-group">
-                                                    <button class="btn btn-success btn-sm" data-tooltip="tooltip" data-placement="bottom" title="Programar mantenimiento" data-toggle="modal" data-target="#mant_pro<?= $id_inventario ?>">
-                                                        <i class="fa fa-clock"></i>
-                                                    </button>
+                                                    <form method="post">
+                                                        <input type="hidden" name="id_log" value="<?= $id_log ?>">
+                                                        <input type="hidden" name="id_inventario" value="<?= $id_inventario ?>">
+                                                        <input type="hidden" name="id_user" value="<?= $id_user ?>">
+                                                        <input type="hidden" name="id_area" value="<?= $id_area ?>">
+                                                        <input type="hidden" name="id_reporte" value="<?= $id_reporte ?>">
+                                                        <input type="hidden" name="fecha_respuesta" value="<?php echo date('Y-m-d H:i:s'); ?>">
+                                                        <button class="btn btn-success btn-sm" data-tooltip="tooltip" data-placement="bottom" title="Solucionar mantenimiento" name="solucionar">
+                                                            <i class="fa fa-clock"></i>
+                                                        </button>
+                                                    </form>
                                                     <button class="btn btn-info btn-sm" data-tooltip="tooltip" data-placement="bottom" title="Realizar copia seguridad" data-toggle="modal" data-target="#copia<?= $id_inventario ?>">
                                                         <i class="fas fa-clone"></i>
-                                                    </button>
-                                                    <button class="btn btn-warning btn-sm <?= $visible_mant ?>" data-tooltip="tooltip" data-placement="bottom" title="Mantenimiento" data-toggle="modal" data-target="#mant_inv<?= $id_inventario ?>">
-                                                        <i class="fas fa-wrench"></i>
                                                     </button>
                                                     <a href="<?= BASE_URL ?>imprimir/reporte?inventario=<?= base64_encode($id_inventario) ?>" target="_blank" class="btn btn-primary btn-sm <?= $visible_descargar ?>" data-tooltip="tooltip" data-placement="bottom" title="Descargar reporte">
                                                         <i class="fa fa-download"></i>
@@ -441,10 +386,30 @@ if (!$permisos) {
         </div>
     </div>
 </div>
+
+
 <?php
 include_once VISTA_PATH . 'script_and_final.php';
 include_once VISTA_PATH . 'modulos' . DS . 'mantenimientos' . DS . 'programarMant.php';
+?>
+<script src="<?=PUBLIC_PATH?>js/mantenimientos/funcionesMantenimientos.js"></script>
 
+<?php
+if (isset($_POST['mantenimiento_solucion'])) {
+    $instancia->programarMantenimientosHebreoControl();
+}
+
+if (isset($_POST['reporte_preventivo'])) {
+    $instancia->programarMantenimientosSinSolucionControl();
+}
+
+if(isset($_POST['solucionar'])){
+    $instancia->confirmarMantenimientoInventarioControl();
+}
+
+//========= FUNCIONES ANTIGUAS =========
+
+/*
 if (isset($_POST['id_inventario_mant'])) {
     $instancia->mantenimientoArticuloControl();
 }
@@ -459,5 +424,5 @@ if (isset($_POST['id_inventario_copia'])) {
 
 if(isset($_POST['mant_sistemas'])){
     $instancia->programarMantenimientosControl();
-
 }
+    */

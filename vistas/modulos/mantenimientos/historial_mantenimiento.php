@@ -21,6 +21,7 @@ if (!$_SESSION['rol']) {
     header('Location:../login?er=' . $error);
 
     exit();
+
 }
 
 include_once VISTA_PATH . 'cabeza.php';
@@ -29,38 +30,30 @@ include_once VISTA_PATH . 'navegacion.php';
 
 require_once CONTROL_PATH . 'inventario' . DS . 'ControlInventario.php';
 
-//require_once CONTROL_PATH . 'mantenimiento' . DS . 'MantenimientoProgContr.php';
-
 require_once CONTROL_PATH . 'perfil' . DS . 'ControlPerfil.php';
+
+require_once CONTROL_PATH . 'categorias' . DS . 'ControlCategorias.php';
 
 
 
 $instancia = ControlInventario::singleton_inventario();
+$instancia_categoria = ControlCategorias::singleton_categorias();
 
 //$products = $instancia->getProducts();
 
 
 if (isset($_POST['buscar'])) {
-    /*
-        if(isset($_POST['periodo'])){
-            $period=$_POST['periodo'];
-        }else{
-            $period="";
-        }
-        */
+    $datos = array(
+        'anio_inicio' => (isset($_POST['anio_inicio'])) ? $_POST['anio_inicio'] : '',
+        'anio_final' => (isset($_POST['anio_final'])) ? $_POST['anio_final'] : '',
+        'categoria' => (isset($_POST['categoria'])) ? $_POST['categoria'] : '',
+    );
 
-    $data = array('anio' => $_POST['anio'], 'periodo' => $_POST['periodo']);
-    $historial = $instancia->getHistorialMantenimientoBusquedaModel();
-
-    //$getProgramacion = $instancia->getProgramacionSearch($data);
-
+    $historial = $instancia->getHistorialMantenimientoFiltradoControl($datos);
 
 } else {
-    $historial = $instancia->getHistorialMantenimiento();
-    //$getProgramacion = $instancia->getProgramacion();
-
+    $historial = $instancia->getHistorialMantenimientoControl();
 }
-
 
 
 $permisos = $instancia_permiso->permisosUsuarioControl(2, $perfil_log);
@@ -70,8 +63,10 @@ if (!$permisos) {
     include_once VISTA_PATH . 'modulos' . DS . '403.php';
 
     exit();
+
 }
 
+$datos_categorias = $instancia->mostrarCategoriasControl($id_super_empresa);
 ?>
 
 <div class="container-fluid">
@@ -104,68 +99,32 @@ if (!$permisos) {
 
                     <form method="POST">
 
-                        <div class="row">
-                            <!--
+                        <div class="row align-items-between">
 
-                            <div class="col-lg-3">
-                                <div class="form-group">
-
-                                    <label class="font-weight-bold">Articulo <span class="text-danger"></span></label>
-
-                                    <select name="anio" required>
-                                        <option value="" selected disabled hidden>Seleccione una
-                                            opcion</option>
-                                        <option value="2023/2024">2023/2024</option>
-                                        <option value="2024/2025">2024/2025</option>
-                                        <option value="2025/2026">2025/2026</option>
-                                        <option value="2026/2027">2026/2027</option>
-                                        <option value="2027/2028">2027/2028</option>
-                                        <option value="2028/2029">2028/2029</option>
-                                    </select>
-
-                                </div>
-                            </div>
                             <div class="col-lg-3 form-group">
 
-                                <label class="font-weight-bold">Año<span class="text-danger"></span></label>
-                                <select name="periodo">
-                                    <option value="" selected disabled hidden>Seleccione una
-                                        opcion</option>
-                                    <option value="1">Periodo 1</option>
-                                    <option value="2">Periodo 2</option>
+                                <input type="date" name="anio_inicio" class="form-control">
+
+                            </div>
+                            <div class="col-lg-3 form-group">
+                                <input type="date" name="anio_final" class="form-control">
+                            </div>
+
+                            <div class="col-lg-3 form-group">
+                                <select name="categoria" id="categoria" class="form-control">
+                                    <option value="" disabled selected>Seleccione una categoria</option>
+                                    <?php foreach($datos_categorias as $categoria): ?>
+                                    <option value="<?=$categoria['id']?>"><?=$categoria['nombre']?></option>
+                                    <?php endforeach; ?>
                                 </select>
-
                             </div>
 
-                            -->
-                            
-                            <div class="col-lg-3 form-group"></div>
-                            <div class="col-lg-3 form-group"></div>
-                            <div class="col-lg-3 form-group"></div>
-
-                            <div class="col-lg-3 form-group">
-                                <label class="font-weight-bold">Busqueda<span class="text-danger"></span></label>
-
-                                <div class="input-group">
-
-                                    <input type="text" class="form-control filtro" placeholder="Buscar" aria-describedby="basic-addon2" name="buscar" data-tooltip="tooltip" data-trigger="focus" data-placement="top" title="Presione ENTER para buscar">
-
-                                    <div class="input-group-append">
-
-                                        <button class="btn btn-primary btn-sm" type="submit">
-
-                                            <i class="fa fa-search"></i>
-
-                                            &nbsp;
-
-                                            Buscar
-
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
+                            <div class="col-lg-3 form-group text-right">
+                                <button class="btn btn-md btn-info" name="buscar">
+                                    <i class="fa fa-filter" aria-hidden="true"></i>
+                                    &nbsp;
+                                    Filtrar
+                                </button>
                             </div>
 
                         </div>
@@ -174,7 +133,7 @@ if (!$permisos) {
 
                     <div class="table-responsive mt-2">
 
-                        <table class="table table-hover border table-sm" width="100%" cellspacing="0">
+                        <table id="myTable" class="table table-striped" width="100%" cellspacing="0">
 
                             <thead>
 
@@ -192,39 +151,83 @@ if (!$permisos) {
 
                                     <th scope="col">Estado</th>
 
-
+                                    
 
                                 </tr>
 
                             </thead>
 
                             <tbody class="buscar">
-                                <?php
-                                if ($historial) {
-                                    foreach ($historial as $getHistorial) {
-                                        $id = $getHistorial['id'];
-                                        $articulo = $getHistorial['articulo'];
-                                        $tipo = $getHistorial['tipo'];
-                                        $descripcion = $getHistorial['descripcion'];
-                                        $estado = $getHistorial['estado'];
-                                        $fecha = $getHistorial['fecha'];
 
-                                        if ($estado == 3) {
-                                            $span_estado = '<span class="badge badge-success">Realizado</span>';
-                                        }
-                                ?>
-                                        <tr class="text-center">
-                                            <td><?= $id ?></td>
-                                            <td><?= $articulo ?></td>
-                                            <td><?= $tipo ?></td>
-                                            <td><?= $descripcion ?></td>
-                                            <td><?= $fecha ?></td>
-                                            <td><?= $span_estado ?></td>
-                                        </tr>
                                 <?php
+
+                                if ($historial) {
+
+                                    foreach ($historial as $getHistorial) {
+
+                                        $id_inventario = $getHistorial['id_inventario'];
+
+                                        $inventario = $getHistorial['inventario'];
+
+                                        $tipo = $getHistorial['observacion'];
+
+                                        $descripcion = $getHistorial['descripcion'];
+
+                                        $estado = $getHistorial['estado'];
+
+                                        $fecha = $getHistorial['fechareg'];
+
+                                        $periodo = 'No información';
+
+
+                                        if ($estado == 6) {
+
+                                            $span_estado = '<span class="badge badge-success">Realizado</span>';
+
+                                        }
+                                       
+
+
+                                        ?>
+
+                                        <tr class="text-center">
+
+                                            <td>
+                                                <?= $id_inventario?>
+                                            </td>
+
+                                            <td>
+                                                <?= $inventario ?>
+                                            </td>
+
+                                            <td>
+                                                <?= $tipo ?>
+                                            </td>
+
+
+                                            <td>
+                                                <?= $descripcion ?>
+                                            </td>
+
+                                            <td>
+                                                <?= $fecha  ?>
+                                            </td>
+
+                                            <td>
+                                                <?= $span_estado ?>
+                                            </td>
+
+                                        </tr>
+
+                                        <?php
+
                                     }
+
                                 }
+
+
                                 ?>
+
                             </tbody>
 
                         </table>
@@ -245,9 +248,25 @@ if (!$permisos) {
 
 <?php
 
+if(isset($_POST['btn_generar_indicador'])){
+    $instancia->generarIndicadorDeGestiónControl();
+}
+
+
 include_once VISTA_PATH . 'script_and_final.php';
 
 include_once VISTA_PATH . 'modulos' . DS . 'usuarios' . DS . 'agregarUsuario.php';
 
 
+
 ?>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.css" />
+
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#myTable').DataTable();
+    });
+</script>

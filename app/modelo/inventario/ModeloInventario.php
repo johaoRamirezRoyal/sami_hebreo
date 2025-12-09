@@ -959,6 +959,7 @@ class ModeloInventario extends conexion
         try {
             $pdo = conexion::singleton_conexion();
             $sql = "SELECT 
+                inv.id, 
                 inv.id_area, 
                 a.nombre, 
                 inv.id_user AS id_user, 
@@ -2009,12 +2010,12 @@ ORDER BY iv.id DESC;";
 
         WHERE iv.activo = 1
         AND iv.id =$idInventario
-        AND iv.estado IN(1,2,3,6,7,10) 
-        AND iv.descripcion LIKE 'aire%%'
+        AND iv.estado IN(1,2,3,6,7,10)
         AND iv.fechareg <= '" . $fecha . "'
         GROUP BY iv.descripcion, iv.estado
         ORDER BY iv.id DESC;";
-
+        var_dump($cmdsql);
+        die();
         try {
 
             $preparado = $cnx->preparar($cmdsql);
@@ -4115,5 +4116,160 @@ ORDER BY iv.id DESC;";
         }
         $cnx->closed();
         $cnx = null;
+    }
+
+    public static function obtenerInventarioPorIdCategoriaModel($id_categoria){
+        $tabla = "inventario";
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "select * from $tabla where id_categoria = $id_categoria";
+        try{
+            $preparado = $cnx->preparar($cmdsql);
+            if($preparado->execute()){
+                return $preparado->fetchAll(PDO::FETCH_ASSOC);
+            }else{
+                return false;
+            }
+        
+        }catch(PDOException $e){
+            print "Error!: " . $e->getMessage();
+        }
+    }
+
+    public static function mostrarEquiposEnMantenimientoPreventivo()
+    {
+        $tabla = "reportes";
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "SELECT r.*,
+                        i.descripcion AS nom_inventario,
+                        a.nombre AS nom_area,
+                        CONCAT(u.nombre) AS nom_user,
+                        i.modelo, 
+                        i.codigo,
+                        i.marca,
+                        i.id_categoria,
+                        e.nombre AS nom_estado
+                    FROM $tabla r
+                    LEFT JOIN reportes r2 ON r2.id_reporte = r.id 
+                    LEFT JOIN inventario i ON r.id_inventario = i.id 
+                    LEFT JOIN areas a ON a.id = i.id_area 
+                    LEFT JOIN usuarios u ON u.id_user = i.id_user 
+                    LEFT JOIN estado e ON r.estado = e.id 
+                    LEFT JOIN categoria c ON i.id_categoria = c.id
+                    WHERE r.estado = 6 AND r2.id IS NULL
+                    ORDER BY r.fechareg ASC;";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll(PDO::FETCH_ASSOC);
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error al mostrar los equipos en mantenimiento preventivo: " . $e->getMessage();
+        }
+    }
+
+    public static function registrarSolucionMantenimientoHebreoModel($datos)
+    {
+
+        $tabla = 'reportes';
+
+        $cnx = conexion::singleton_conexion();
+
+        $cmdsql = "INSERT INTO reportes (id_inventario, observacion, estado, id_area, id_user, id_log, id_resp, id_reporte, tipo_reporte, fecha_respuesta, fechareg) VALUES (
+
+                    '" . $datos['id_inventario'] . "',
+
+                    'Mantenimiento Preventivo (Solucion)',
+
+                    '" . $datos['estado'] . "',
+
+                    '" . $datos['id_area'] . "',
+
+                    '" . $datos['id_user'] . "',
+
+                    '" . $datos['id_log'] . "',
+
+                    '" . $datos['id_resp'] . "',
+
+                    '" . $datos['id_reporte'] . "',
+
+                    '" . $datos['tipo_reporte'] . "',
+
+                    '" . $datos['fecha_respuesta'] . "',
+
+                    '" . $datos['fechareg'] . "');";
+
+        try {
+
+            $preparado = $cnx->preparar($cmdsql);
+
+            if ($preparado->execute()) {
+
+                return true;
+            } else {
+
+                return false;
+            }
+        } catch (PDOException $e) {
+
+            print "Error!: " . $e->getMessage();
+        }
+
+        $cnx->closed();
+
+        $cnx = null;
+    }
+
+    public static function getHistorialMantenimientoModel(){
+        $tabla = "reportes";
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "SELECT r.id,r.observacion,r.estado,r.fechareg,
+                    COALESCE(r.descripcion, 'SIN DESCRIPCION') AS descripcion, 
+                    iv.descripcion as inventario,
+                    iv.id AS id_inventario
+                    FROM $tabla r
+                    INNER JOIN inventario iv ON iv.id = r.id_inventario
+                    AND r.estado = 6
+                    ORDER BY r.id DESC
+                    LIMIT 50;";
+        try{
+            $preparado = $cnx->preparar($cmdsql);
+            if($preparado->execute()){
+                return $preparado->fetchAll(PDO::FETCH_ASSOC);
+            }else{
+                return false;
+            }
+        }catch(PDOException $e){
+            print "Error al recuperar el historial: " . $e->getMessage();
+        }
+    }
+    public static function getHistorialMantenimientoFiltradoModel($anio, $categoria){
+        
+        $tabla = "reportes";
+        $cnx = conexion::singleton_conexion();
+
+
+
+        $cmdsql = "SELECT r.id,r.observacion,r.estado,r.fechareg,
+                    COALESCE(r.descripcion, 'SIN DESCRIPCION') AS descripcion, 
+                    iv.descripcion as inventario,
+                    iv.id AS id_inventario
+                    FROM $tabla r
+                    INNER JOIN inventario iv ON iv.id = r.id_inventario
+                    WHERE r.estado = 6 
+                    $anio 
+                    $categoria
+                    ORDER BY r.id DESC";
+        try{
+            $preparado = $cnx->preparar($cmdsql);
+            if($preparado->execute()){
+                return $preparado->fetchAll(PDO::FETCH_ASSOC);
+            }else{
+                return false;
+            }
+        }catch(PDOException $e){
+            print "Error al recuperar el historial: " . $e->getMessage();
+        }
     }
 }
