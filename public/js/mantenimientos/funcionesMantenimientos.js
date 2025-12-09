@@ -31,7 +31,7 @@ $(document).ready(function () {
                          value="${item.id}" 
                          id="inv_${item.id}">
                   <label class="form-check-label" for="inv_${item.id}">
-                    ${item.descripcion}
+                    ${item.descripcion} - ${item.nom_area}
                   </label>
                 </div>
               </div>
