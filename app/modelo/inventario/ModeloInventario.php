@@ -4121,7 +4121,10 @@ ORDER BY iv.id DESC;";
     public static function obtenerInventarioPorIdCategoriaModel($id_categoria){
         $tabla = "inventario";
         $cnx = conexion::singleton_conexion();
-        $cmdsql = "select * from $tabla where id_categoria = $id_categoria";
+        $cmdsql = "SELECT *, a.nombre AS nom_area
+                    FROM $tabla i 
+                    LEFT JOIN areas a ON a.id = i.id_area 
+                    WHERE i.id_categoria = $id_categoria";
         try{
             $preparado = $cnx->preparar($cmdsql);
             if($preparado->execute()){
