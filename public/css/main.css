@@ -1,0 +1,725 @@
+* {
+
+    margin: 0;
+
+    outline: 0;
+
+    padding: 0;
+
+}
+
+.bg-semi-transparent {
+
+    background-color: rgba(255, 255, 255, 0.658) !important;
+
+}
+
+/*::-webkit-scrollbar {
+
+    display: none;
+
+}*/
+
+
+
+.bg-image {
+
+    background-image: url('../img/fondo.jpg') !important;
+
+    background-size: cover;
+
+    padding: 0px !important;
+
+    background-repeat: no-repeat;
+
+    background-position: center;
+
+}
+
+.loader {
+
+    position: fixed;
+
+    left: 0px;
+
+    top: 0px;
+
+    width: 100%;
+
+    height: 100%;
+
+    z-index: 9999;
+
+    background: url('../img/engranajes.gif') 50% 50% no-repeat rgb(249, 249, 249);
+
+    background-size: 20%;
+
+    opacity: .8;
+
+}
+
+/*-----------------------Margins-------------------------------*/
+
+
+
+.mt-d02 {
+
+    margin-top: -0.2%;
+
+}
+
+.mt-d1 {
+
+    margin-top: -1%;
+
+}
+
+.mt-d2 {
+
+    margin-top: -2%;
+
+}
+
+.mt-d3 {
+
+    margin-top: -3%;
+
+}
+
+.mt-d5 {
+
+    margin-top: -5%;
+
+}
+
+
+
+.mt-5_5 {
+
+    margin-top: 2.5rem !important;
+
+}
+
+
+
+.mt-5 {
+
+    margin-top: 5%;
+
+}
+
+.mt-6 {
+
+    margin-top: 6%;
+
+}
+
+.mt-10 {
+
+    margin-top: 10%;
+
+}
+
+.mt-15 {
+
+    margin-top: 15%;
+
+}
+
+.mt-20 {
+
+    margin-top: 20%;
+
+}
+
+.mt-25 {
+
+    margin-top: 25%;
+
+}
+
+.mt-30 {
+
+    margin-top: 30%;
+
+}
+
+.mt-35 {
+
+    margin-top: 35%;
+
+}
+
+.mt-40 {
+
+    margin-top: 40%;
+
+}
+
+.mt-45 {
+
+    margin-top: 45%;
+
+}
+
+.ml-5 {
+
+    margin-left: 5%;
+
+}
+
+.ml-10 {
+
+    margin-left: 10%;
+
+}
+
+.ml-20 {
+
+    margin-left: 20%;
+
+}
+
+.ml-35 {
+
+    margin-left: 35%;
+
+}
+
+.ml-40 {
+
+    margin-left: 40%;
+
+}
+
+.mb-5 {
+
+    margin-bottom: 1.6rem !important;
+
+}
+
+/*------------------------------------Bordes-------------------------------------*/
+
+
+
+.border-left-orange {
+
+    border-left: 0.25rem solid #dc7633 !important;
+
+}
+
+.border-left-blue {
+
+    border-left: 0.25rem solid #3498db !important;
+
+}
+
+.border-left-blue-dark {
+
+    border-left: 0.25rem solid #000066 !important;
+
+}
+
+.border-left-purple {
+
+    border-left: 0.25rem solid #7d30e2b7 !important;
+
+}
+
+.border-left-pink {
+
+    border-left: 0.25rem solid #e91e63 !important;
+
+}
+
+.border-left-brown {
+
+    border-left: 0.25rem solid #795548 !important;
+
+}
+
+.border-left-pink-white {
+
+    border-left: 0.25rem solid #f06292 !important;
+
+}
+
+.border-left-green-dark {
+
+    border-left: 0.25rem solid #45b39d !important;
+
+}
+
+.border-left-yellow {
+
+    border-left: 0.25rem solid #c0ca33 !important;
+
+}
+
+.border-left-green {
+
+    border-left: 0.25rem solid #48c9b0 !important;
+
+}
+
+.border-left-semi-green {
+
+    border-left: 0.25rem solid #049579 !important;
+
+}
+
+.border-left-semi-orange {
+
+    border-left: 0.25rem solid #ff5722 !important;
+
+}
+
+.border-left-green-force {
+
+    border-left: 0.25rem solid #666633 !important;
+
+}
+
+.border-left-black {
+
+    border-left: 0.25rem solid #283747 !important;
+
+}
+
+.border-left-gray {
+
+    border-left: 0.25rem solid #455a64 !important;
+
+}
+
+.border-left-red {
+
+    border-left: 0.25rem solid #da3b53 !important;
+
+}
+
+.border-left-hebreo {
+
+    border-left: 0.25rem solid #0e2a88 !important;
+
+}
+
+/*----------------------------------- ALERTS------------------------------------ */
+
+
+
+/* inspired by Twitter Bootstrap */
+
+
+
+.alert {
+
+    padding: 15px;
+
+    margin-bottom: 20px;
+
+    border: none;
+
+    border-radius: 4px;
+
+    position: fixed;
+
+    bottom: 0px;
+
+    right: 21px;
+
+    float: right;
+
+    clear: right;
+
+    background-color: white;
+
+    z-index: 8000;
+
+}
+
+.alert-red {
+
+    color: white;
+
+    background-color: #DA4453;
+
+}
+
+.alert-green {
+
+    color: white;
+
+    background-color: #37BC9B;
+
+}
+
+.alert-blue {
+
+    color: white;
+
+    background-color: #4A89DC;
+
+}
+
+.alert-yellow {
+
+    color: white;
+
+    background-color: #F6BB42;
+
+}
+
+.alert-orange {
+
+    color: white;
+
+    background-color: #E9573F;
+
+}
+
+/*------------------------WIDTHS--------------------*/
+
+
+
+.col-lg-sm {
+
+    max-width: 9.9%;
+
+}
+
+.w-responsive {
+
+    width: 75% !important;
+
+}
+
+/*-------------------------BACKGROUNDS------------------------------*/
+
+
+
+.bg-gray {
+
+    background-color: #d6dbdf;
+
+}
+
+.bg-gradient-blue-dark {
+
+    background-color: #28225c;
+
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(10%, #28225c), to(#28225c));
+
+    background-image: linear-gradient(180deg, #28225c 10%, #28225c 100%);
+
+    background-size: cover;
+
+}
+
+/*----------------------------Textos-----------------------------------*/
+
+
+
+.text-decoration-none {
+
+    text-decoration: none !important;
+
+}
+
+.text-orange {
+
+    color: #dc7633 !important;
+
+}
+
+.text-blue {
+
+    color: #3498db !important;
+
+}
+
+.text-blue-dark {
+
+    color: #000066 !important;
+
+}
+
+.text-purple {
+
+    color: #7d30e2b7 !important;
+
+}
+
+.text-pink {
+
+    color: #e91e63 !important;
+
+}
+
+.text-brown {
+
+    color: #795548 !important;
+
+}
+
+.text-pink-white {
+
+    color: #f06292 !important;
+
+}
+
+.text-green-dark {
+
+    color: #45b39d !important;
+
+}
+
+.text-yellow {
+
+    color: #c0ca33 !important;
+
+}
+
+.text-green {
+
+    color: #48c9b0 !important;
+
+}
+
+.text-semi-green {
+
+    color: #049579 !important;
+
+}
+
+.text-semi-orange {
+
+    color: #ff5722 !important;
+
+}
+
+.text-green-force {
+
+    color: #666633 !important;
+
+}
+
+.text-black {
+
+    color: #283747 !important;
+
+}
+
+.text-gray {
+
+    color: #455a64 !important;
+
+}
+
+.text-red {
+
+    color: #da3b53 !important;
+
+}
+
+.text-hebreo {
+
+    color: #0e2a88 !important;
+
+}
+
+/*------------------------------------------------------------*/
+
+
+
+.bg-blue-transparent {
+
+    background-color: rgb( 84, 153, 199, 0.2);
+
+}
+
+/*----------------------------Cursor--------------------------------------*/
+
+
+
+.cursor-pointer {
+
+    cursor: pointer !important;
+
+}
+
+/*-----------------------BUTTONS-----------------------*/
+
+
+
+.btn-hebreo {
+
+    color: #fff;
+
+    background-color: #0e2a88;
+
+    border-color: #0e2a88;
+
+}
+
+.btn-hebreo:hover {
+
+    color: #fff;
+
+    background-color: #0a2fab;
+
+    border-color: #0a2fab;
+
+}
+
+
+
+/*----------------------------------*/
+
+
+
+.file-caption-name {
+
+    font-size: 0.9em !important;
+
+}
+
+/*-----------------RESPONSIVE---------------------------*/
+
+
+
+@media screen and (min-width: 1024px) {
+
+    .w-responsive {
+
+        width: 100% !important;
+
+    }
+
+}
+
+/*@media screen and (-webkit-min-device-pixel-ratio:0) {
+
+    .modal {
+
+        height: 720px !important;
+
+        overflow-y: auto !important;
+
+    }
+
+    }*/
+
+
+
+/*
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+
+    .modal {
+
+        height: auto !important;
+
+    }
+
+}
+
+@media screen and (-moz-min-device-pixel-ratio: 0) {
+
+    .modal {
+
+        height: 100vh !important;
+
+    }
+
+}*/
+
+
+
+/*--------Foto de perfil--------------*/
+
+
+
+.circular--portrait {
+
+    margin-right: auto;
+
+    margin-left: auto;
+
+    width: 310px;
+
+    height: 310px;
+
+    overflow: hidden;
+
+    border-radius: 60%;
+
+    overflow: hidden;
+
+    text-align: center;
+
+}
+
+.circular--portrait img {
+
+    width: 100%;
+
+    height: auto;
+
+    margin-top: -5%;
+
+}
+
+.circular--perfil {
+
+    margin-right: auto;
+
+    margin-left: auto;
+
+    width: 40px;
+
+    height: 40px;
+
+    overflow: hidden;
+
+    border-radius: 60%;
+
+    overflow: hidden;
+
+}
+
+.circular--perfil img {
+
+    width: 100%;
+
+    height: auto;
+
+    margin-top: -5%;
+
+}
+
+.circular--coment {
+
+    margin-right: auto;
+
+    margin-left: auto;
+
+    width: 80px;
+
+    height: 80px;
+
+    overflow: hidden;
+
+    border-radius: 50%;
+
+    overflow: hidden;
+
+}
+
+.circular--coment img {
+
+    width: 100%;
+
+    height: auto;
+
+}
