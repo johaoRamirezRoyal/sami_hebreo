@@ -8,7 +8,7 @@ class conexion
 
     private static $hostip         = 'localhost';
     private static $username       = 'root';
-    private static $passwordserver = 'Angel1413@.-+#';
+    private static $passwordserver = '';
     protected $database            = 'sami_hebreo';
 
     private function __construct()
