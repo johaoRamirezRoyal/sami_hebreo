@@ -120,15 +120,16 @@ class ControlInventario
         return $mostrar;
     }
 
-    public function mostrarArticulosAgrupadosModalControl ($descripcion,$idarea,$id_usuario){
+    public function mostrarArticulosAgrupadosModalControl($descripcion, $idarea, $id_usuario)
+    {
         $comando = ModeloInventario::ComandoSQL();
-        $mostrar = ModeloInventario::mostrarArticulosAgrupadosModalModel($descripcion,$idarea, $id_usuario);
+        $mostrar = ModeloInventario::mostrarArticulosAgrupadosModalModel($descripcion, $idarea, $id_usuario);
         return $mostrar;
     }
 
-    
+
     public function guardarInventarioDirecto()
-    {   
+    {
 
         $fecha_compra  = ($_POST['fecha'] == '') ? '0000-00-00' : $_POST['fecha'];
         $fecha_ingreso = ($_POST['fecha_ingreso'] == '') ? '0000-00-00' : $_POST['fecha_ingreso'] . date(' H:i:s');
@@ -162,7 +163,7 @@ class ControlInventario
                 $guardar_evidencia = ModeloInventario::guardarInventarioDirectoModel($datos);
             }
         }
-        
+
 
         if ($guardar_evidencia) {
             echo '
@@ -180,7 +181,6 @@ class ControlInventario
             ohSnap("Ha ocurrido un error!", {color: "red", "duration": "5000"});
             </script>';
         }
-
     }
 
 
@@ -538,8 +538,9 @@ class ControlInventario
         return $mostrar;
     }
 
-    public function obtenerInventarioDesagrupadoControl($desc_inventario,$id_area, $id_user){
-        $result = ModeloInventario::obtenerInventarioDesagrupadoModel($desc_inventario,$id_area, $id_user);
+    public function obtenerInventarioDesagrupadoControl($desc_inventario, $id_area, $id_user)
+    {
+        $result = ModeloInventario::obtenerInventarioDesagrupadoModel($desc_inventario, $id_area, $id_user);
         return $result;
     }
 
@@ -648,7 +649,7 @@ class ControlInventario
 
     public function mostrarDatosReporteImprimir($datos)
     {
-   
+
 
         $mostrar = ModeloInventario::mostrarDatosReporteImprimirModel($datos);
 
@@ -736,7 +737,7 @@ class ControlInventario
             }
         }
     }
-    
+
 
     public function agregarInvProduct()
     {
@@ -1758,11 +1759,9 @@ class ControlInventario
                     );
 
 
-            
+
 
                     $guardar_reporte = ModeloInventario::insertarReporteModel($datos_reporte);
-
-
                 }
 
 
@@ -1950,10 +1949,8 @@ class ControlInventario
                     );
 
                     $guardar_reporte = ModeloInventario::insertarReporteModel($datos_reporte);
-                    
-
                 }
-                
+
                 if ($guardar_reporte == true) {
 
                     echo '
@@ -2069,35 +2066,36 @@ class ControlInventario
 
 
 
-    public function reportarArticuloListadoControl($id_inv, $desc_report, $id_user_modal, $nom_art, $id_log) {
+    public function reportarArticuloListadoControl($id_inv, $desc_report, $id_user_modal, $nom_art, $id_log)
+    {
         try {
             // Cambiar estado en Inventario
             $estado_inventario = ModeloInventario::actualizarEstadoInventarioModel($id_inv, $desc_report);
-        
+
             if ($estado_inventario) {
 
                 //echo $id_inv." - ";
 
                 // Obtener datos del inventario
                 $datos_inv = ModeloInventario::obtenerDatosInventarioModel($id_inv);
-        
+
                 if ($datos_inv) {
                     $id_area = $datos_inv['id_area'];
                     $id_user = $datos_inv['id_user'];
-        
+
                     // Ingresar registro de reporte
                     $ingresar_reporte = ModeloInventario::ingresarReporteModel(
-                        $id_inv, 
-                        $desc_report, 
-                        $id_area, 
+                        $id_inv,
+                        $desc_report,
+                        $id_area,
                         $id_user,
                         $id_log
                     );
-        
+
                     if ($ingresar_reporte) {
                         // Configurar y enviar correo
                         $fecha = date('Y-m-d H:i:s');
-                        
+
                         $mensaje = '
                         <div>
                         <p style="font-size: 1.6em;">
@@ -2116,7 +2114,7 @@ class ControlInventario
                         </p>
                         </div>
                         ';
-        
+
                         // Configurar datos para el correo
                         $datos_correo = [
                             'asunto' => 'Reporte de Articulo - ' . htmlspecialchars($nom_art),
@@ -2124,16 +2122,16 @@ class ControlInventario
                             'correo' => array('ghumana@colegiohebreounion.edu.co', 'japaricio@colegiohebreounion.edu.co', 'jrodriguez@colegiohebreounion.edu.co', 'jcervantes@colegiohebreounion.edu.co', 'angel_vargas_contreras@hotmail.com'),
                             'archivo' => ['']
                         ];
-        
+
                         // Enviar correo
                         $enviar_correo = Correo::enviarCorreoModel($datos_correo);
-                        
+
                         echo '
                         <script>
                         ohSnap("Reporte ingresado correctamente!", {color: "green", "duration": "3000"});
                         
                         setTimeout(function() {
-                            window.location.replace("'.BASE_URL.'inventario/listado");
+                            window.location.replace("' . BASE_URL . 'inventario/listado");
                         }, 1000);
                         </script>
                         ';
@@ -3090,7 +3088,7 @@ class ControlInventario
 
 
 
-               $enviar_correo = Correo::enviarCorreoModel($datos_correo);
+                $enviar_correo = Correo::enviarCorreoModel($datos_correo);
             }
 
             return $guardar;
@@ -3388,171 +3386,183 @@ class ControlInventario
 
 
 
-public function programarMantenimientosControl()
-{
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        return;
-    }
-
-    // Validar campos mínimos
-    if (!isset($_POST['id_log']) || empty($_POST['id_log']) ||
-        !isset($_POST['fecha_desde']) || !isset($_POST['fecha_hasta'])) {
-        echo '<script>ohSnap("Faltan campos obligatorios.", {color: "red", "duration": "2000"});</script>';
-        return;
-    }
-
-    // Sanitizar entradas
-    $id_log = intval($_POST['id_log']);
-    $id_categoria = isset($_POST['id_categoria']) ? intval($_POST['id_categoria']) : null;
-    $descripcion = isset($_POST['descripcion']) ? trim($_POST['descripcion']) : '';
-
-    // Parsear fechas
-    $fecha_desde_ts = strtotime($_POST['fecha_desde']);
-    $fecha_hasta_ts = strtotime($_POST['fecha_hasta']);
-
-    if ($fecha_desde_ts === false || $fecha_hasta_ts === false) {
-        echo '<script>ohSnap("Formato de fecha inválido.", {color: "red", "duration": "2000"});</script>';
-        return;
-    }
-
-    if ($fecha_desde_ts > $fecha_hasta_ts) {
-        echo '<script>ohSnap("La fecha desde no puede ser mayor a la fecha hasta.", {color: "red", "duration": "2000"});</script>';
-        return;
-    }
-
-    // Generar array de fechas hábiles entre los rangos (lunes a viernes)
-    $fechas_array = [];
-    for ($i = $fecha_desde_ts; $i <= $fecha_hasta_ts; $i += 86400) {
-        $dia_semana = date('w', $i); // 0 = domingo, 6 = sábado
-        if ($dia_semana != 0 && $dia_semana != 6) {
-            $fechas_array[] = date('Y-m-d', $i);
-        }
-    }
-
-    $conteo = count($fechas_array);
-    if ($conteo === 0) {
-        echo '<script>ohSnap("No hay días hábiles en el rango seleccionado.", {color: "red", "duration": "2000"});</script>';
-        return;
-    }
-
-    // Mapear categoría
-    switch ($id_categoria) {
-        case 1: $categoria = 'computador'; break;
-        case 15: $categoria = 'portatil'; break;
-        case 5: $categoria = 'video'; break;
-        case 3: $categoria = 'impresora'; break;
-        default: $categoria = null; break;
-    }
-
-    if ($categoria === null) {
-        echo '<script>ohSnap("Categoría inválida.", {color: "red", "duration": "2000"});</script>';
-        return;
-    }
-
-    // Obtener equipos
-    $equipos_computo = ModeloInventario::mostrarEquipoTodosComputoModel($_POST['fecha_hasta'], $id_categoria);
-
-    if (empty($equipos_computo) || !is_array($equipos_computo)) {
-        echo '<script>ohSnap("No se encontraron equipos para programar mantenimientos.", {color: "red", "duration": "2000"});</script>';
-        return;
-    }
-
-    // Inicializar contadores
-    $registrados = 0;
-    $errores = 0;
-
-    foreach ($equipos_computo as $equipo) {
-        $id_inventario = isset($equipo['id']) ? intval($equipo['id']) : null;
-        $id_user = isset($equipo['id_user']) ? intval($equipo['id_user']) : null;
-        $id_area = isset($equipo['id_area']) ? intval($equipo['id_area']) : null;
-
-        if (!$id_inventario) {
-            $errores++;
-            continue;
+    public function programarMantenimientosControl()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            return;
         }
 
-        // Elegir fecha aleatoria de las disponibles
-        $fecha_aleatorio_index = mt_rand(0, $conteo - 1);
-        $fecha_final = $fechas_array[$fecha_aleatorio_index];
+        // Validar campos mínimos
+        if (
+            !isset($_POST['id_log']) || empty($_POST['id_log']) ||
+            !isset($_POST['fecha_desde']) || !isset($_POST['fecha_hasta'])
+        ) {
+            echo '<script>ohSnap("Faltan campos obligatorios.", {color: "red", "duration": "2000"});</script>';
+            return;
+        }
 
-        // Generar hora aleatoria entre 08:00 y 15:59 para el mantenimiento
-        $hora_random = mt_rand(8, 15);
-        $minuto_random = str_pad(mt_rand(0, 59), 2, '0', STR_PAD_LEFT);
-        $hora_final = str_pad($hora_random, 2, '0', STR_PAD_LEFT) . ':' . $minuto_random . ':00';
+        // Sanitizar entradas
+        $id_log = intval($_POST['id_log']);
+        $id_categoria = isset($_POST['id_categoria']) ? intval($_POST['id_categoria']) : null;
+        $descripcion = isset($_POST['descripcion']) ? trim($_POST['descripcion']) : '';
 
-        $datos = array(
-            'id_log' => $id_log,
-            'id_inventario' => $id_inventario,
-            'id_user' => $id_user,
-            'id_area' => $id_area,
-            'id_categoria' => $id_categoria,
-            'estado' => 6,
-            'tipo_reporte' => 2,
-            'fechareg' => $fecha_final . ' ' . $hora_final,
-            'descripcion' => $descripcion
-        );
+        // Parsear fechas
+        $fecha_desde_ts = strtotime($_POST['fecha_desde']);
+        $fecha_hasta_ts = strtotime($_POST['fecha_hasta']);
 
-        $mantenimientos = ModeloInventario::registrarMantenimientosModel($datos);
+        if ($fecha_desde_ts === false || $fecha_hasta_ts === false) {
+            echo '<script>ohSnap("Formato de fecha inválido.", {color: "red", "duration": "2000"});</script>';
+            return;
+        }
 
-        if (is_array($mantenimientos) && !empty($mantenimientos['guardar']) && $mantenimientos['guardar'] == true && isset($mantenimientos['id'])) {
-            $registrados++;
+        if ($fecha_desde_ts > $fecha_hasta_ts) {
+            echo '<script>ohSnap("La fecha desde no puede ser mayor a la fecha hasta.", {color: "red", "duration": "2000"});</script>';
+            return;
+        }
 
-            // Calcular la próxima fecha hábil (sumar 2 días y ajustar para evitar sábados/domingos)
-            $fecha_proxima_ts = strtotime($fecha_final . ' + 2 days');
-            while (date('w', $fecha_proxima_ts) == 0 || date('w', $fecha_proxima_ts) == 6) {
-                $fecha_proxima_ts = strtotime('+1 day', $fecha_proxima_ts);
+        // Generar array de fechas hábiles entre los rangos (lunes a viernes)
+        $fechas_array = [];
+        for ($i = $fecha_desde_ts; $i <= $fecha_hasta_ts; $i += 86400) {
+            $dia_semana = date('w', $i); // 0 = domingo, 6 = sábado
+            if ($dia_semana != 0 && $dia_semana != 6) {
+                $fechas_array[] = date('Y-m-d', $i);
             }
-            $fecha_proxima = date('Y-m-d', $fecha_proxima_ts);
+        }
 
-            // Generar hora aleatoria para la solución (también entre 08:00 y 15:59)
-            $hora_random_sol = mt_rand(8, 15);
-            $minuto_random_sol = str_pad(mt_rand(0, 59), 2, '0', STR_PAD_LEFT);
-            $hora_final_sol = str_pad($hora_random_sol, 2, '0', STR_PAD_LEFT) . ':' . $minuto_random_sol . ':00';
+        $conteo = count($fechas_array);
+        if ($conteo === 0) {
+            echo '<script>ohSnap("No hay días hábiles en el rango seleccionado.", {color: "red", "duration": "2000"});</script>';
+            return;
+        }
 
-            $datos_solucion = array(
+        // Mapear categoría
+        switch ($id_categoria) {
+            case 1:
+                $categoria = 'computador';
+                break;
+            case 15:
+                $categoria = 'portatil';
+                break;
+            case 5:
+                $categoria = 'video';
+                break;
+            case 3:
+                $categoria = 'impresora';
+                break;
+            default:
+                $categoria = null;
+                break;
+        }
+
+        if ($categoria === null) {
+            echo '<script>ohSnap("Categoría inválida.", {color: "red", "duration": "2000"});</script>';
+            return;
+        }
+
+        // Obtener equipos
+        $equipos_computo = ModeloInventario::mostrarEquipoTodosComputoModel($_POST['fecha_hasta'], $id_categoria);
+
+        if (empty($equipos_computo) || !is_array($equipos_computo)) {
+            echo '<script>ohSnap("No se encontraron equipos para programar mantenimientos.", {color: "red", "duration": "2000"});</script>';
+            return;
+        }
+
+        // Inicializar contadores
+        $registrados = 0;
+        $errores = 0;
+
+        foreach ($equipos_computo as $equipo) {
+            $id_inventario = isset($equipo['id']) ? intval($equipo['id']) : null;
+            $id_user = isset($equipo['id_user']) ? intval($equipo['id_user']) : null;
+            $id_area = isset($equipo['id_area']) ? intval($equipo['id_area']) : null;
+
+            if (!$id_inventario) {
+                $errores++;
+                continue;
+            }
+
+            // Elegir fecha aleatoria de las disponibles
+            $fecha_aleatorio_index = mt_rand(0, $conteo - 1);
+            $fecha_final = $fechas_array[$fecha_aleatorio_index];
+
+            // Generar hora aleatoria entre 08:00 y 15:59 para el mantenimiento
+            $hora_random = mt_rand(8, 15);
+            $minuto_random = str_pad(mt_rand(0, 59), 2, '0', STR_PAD_LEFT);
+            $hora_final = str_pad($hora_random, 2, '0', STR_PAD_LEFT) . ':' . $minuto_random . ':00';
+
+            $datos = array(
                 'id_log' => $id_log,
                 'id_inventario' => $id_inventario,
                 'id_user' => $id_user,
                 'id_area' => $id_area,
-                'id_resp' => 90,
-                'id_reporte' => $mantenimientos['id'],
-                'estado' => 3,
+                'id_categoria' => $id_categoria,
+                'estado' => 6,
                 'tipo_reporte' => 2,
-                'fecha_respuesta' => $fecha_proxima . ' ' . $hora_final_sol,
-                'fechareg' => $fecha_proxima . ' ' . $hora_final_sol,
+                'fechareg' => $fecha_final . ' ' . $hora_final,
+                'descripcion' => $descripcion
             );
 
-            $solucion = ModeloInventario::registrarSolucionMantenimientoControl($datos_solucion);
+            $mantenimientos = ModeloInventario::registrarMantenimientosModel($datos);
 
-            if ($solucion !== true) {
-                // Si falla registrar la solución, lo contamos como error pero continuamos
+            if (is_array($mantenimientos) && !empty($mantenimientos['guardar']) && $mantenimientos['guardar'] == true && isset($mantenimientos['id'])) {
+                $registrados++;
+
+                // Calcular la próxima fecha hábil (sumar 2 días y ajustar para evitar sábados/domingos)
+                $fecha_proxima_ts = strtotime($fecha_final . ' + 2 days');
+                while (date('w', $fecha_proxima_ts) == 0 || date('w', $fecha_proxima_ts) == 6) {
+                    $fecha_proxima_ts = strtotime('+1 day', $fecha_proxima_ts);
+                }
+                $fecha_proxima = date('Y-m-d', $fecha_proxima_ts);
+
+                // Generar hora aleatoria para la solución (también entre 08:00 y 15:59)
+                $hora_random_sol = mt_rand(8, 15);
+                $minuto_random_sol = str_pad(mt_rand(0, 59), 2, '0', STR_PAD_LEFT);
+                $hora_final_sol = str_pad($hora_random_sol, 2, '0', STR_PAD_LEFT) . ':' . $minuto_random_sol . ':00';
+
+                $datos_solucion = array(
+                    'id_log' => $id_log,
+                    'id_inventario' => $id_inventario,
+                    'id_user' => $id_user,
+                    'id_area' => $id_area,
+                    'id_resp' => 90,
+                    'id_reporte' => $mantenimientos['id'],
+                    'estado' => 3,
+                    'tipo_reporte' => 2,
+                    'fecha_respuesta' => $fecha_proxima . ' ' . $hora_final_sol,
+                    'fechareg' => $fecha_proxima . ' ' . $hora_final_sol,
+                );
+
+                $solucion = ModeloInventario::registrarSolucionMantenimientoControl($datos_solucion);
+
+                if ($solucion !== true) {
+                    // Si falla registrar la solución, lo contamos como error pero continuamos
+                    $errores++;
+                }
+            } else {
                 $errores++;
             }
-        } else {
-            $errores++;
         }
-    }
 
-    // Mensaje final
-    if ($registrados > 0 && $errores === 0) {
-        echo '
+        // Mensaje final
+        if ($registrados > 0 && $errores === 0) {
+            echo '
         <script>
-            ohSnap("Mantenimientos Registrados Correctamente! ('.$registrados.')" , {color: "green", "duration": "2000"});
+            ohSnap("Mantenimientos Registrados Correctamente! (' . $registrados . ')" , {color: "green", "duration": "2000"});
             setTimeout(function(){ window.location.replace("index"); }, 1050);
         </script>';
-    } elseif ($registrados > 0) {
-        echo '
+        } elseif ($registrados > 0) {
+            echo '
         <script>
-            ohSnap("Se registraron '.$registrados.' mantenimientos, pero hubo '.$errores.' errores.", {color: "orange", "duration": "3000"});
+            ohSnap("Se registraron ' . $registrados . ' mantenimientos, pero hubo ' . $errores . ' errores.", {color: "orange", "duration": "3000"});
             setTimeout(function(){ window.location.replace("index"); }, 1500);
         </script>';
-    } else {
-        echo '
+        } else {
+            echo '
         <script>
             ohSnap("Error al registrar mantenimientos.", {color: "red", "duration": "2000"});
         </script>';
+        }
     }
-}
 
 
 
@@ -3598,7 +3608,7 @@ public function programarMantenimientosControl()
 
             $conteo = count($fechas_array);
 
-            $inventarios = $_POST['id_aires'];
+            $inventarios = $_POST['inventario_ids'];
 
             foreach ($inventarios as $idInventario) {
 
@@ -3748,12 +3758,13 @@ public function programarMantenimientosControl()
         }
     }
 
-    public function actualizarDatosInventarioControl(){
-        if(
+    public function actualizarDatosInventarioControl()
+    {
+        if (
             $_SERVER['REQUEST_METHOD'] == 'POST' &&
             isset($_POST['id_inventario']) &&
             !empty($_POST['id_inventario'])
-        ){
+        ) {
             $datos = array(
                 'id_inventario' => $_POST['id_inventario'],
                 'descripcion' => $_POST['descripcion'],
@@ -3764,22 +3775,22 @@ public function programarMantenimientosControl()
                 'frecuencia_mantenimiento' => $_POST['frecuencia_mantenimiento']
             );
             $actualizar = ModeloInventario::actualizarDatosInventarioModel($datos);
-            if($actualizar){
+            if ($actualizar) {
                 echo '
                 <script>
                 ohSnap("Actualizado Correctamente!", {color: "green", "duration": "1000"});
                 setTimeout(recargarPagina,1050);
                 function recargarPagina(){
-                    window.location.replace("'.BASE_URL.'listado/historial?inventario='.base64_encode($_POST['id_inventario']).'");
+                    window.location.replace("' . BASE_URL . 'listado/historial?inventario=' . base64_encode($_POST['id_inventario']) . '");
                 }
                 </script>';
-            }else{
+            } else {
                 echo '
                 <script>
                 ohSnap("Ha ocurrido un error!", {color: "red", "duration": "1000"});
                 </script>';
             }
-        }else{
+        } else {
             echo '
             <script>
             ohSnap("Ha ocurrido un error!", {color: "red", "duration": "1000"});
@@ -3787,8 +3798,342 @@ public function programarMantenimientosControl()
         }
     }
 
-    public function obtenerReporteDeInventarioControl($id_inventario){
+    public function obtenerReporteDeInventarioControl($id_inventario)
+    {
         $mostrar = ModeloInventario::obtenerReporteDeInventarioModel($id_inventario);
+        return $mostrar;
+    }
+
+    public function obtenerInventarioPorIdCategoriaControl($id_categoria)
+    {
+        $mostrar = ModeloInventario::obtenerInventarioPorIdCategoriaModel($id_categoria);
+        return $mostrar;
+    }
+
+    public function programarMantenimientosHebreoControl()
+    {
+
+        if (
+            $_SERVER['REQUEST_METHOD'] == 'POST' &&
+
+            isset($_POST['id_log']) &&
+
+            !empty($_POST['id_log'])
+
+        ) {
+
+
+
+            $fecha_desde = strtotime($_POST['fecha_desde']);
+
+            $fecha_hasta = strtotime($_POST['fecha_hasta']);
+
+
+
+
+
+            $fechas_array = [];
+
+
+
+            for ($i = $fecha_desde; $i <= $fecha_hasta; $i += 86400) {
+
+
+
+                $dias_no = date('w', $i);
+
+
+
+                if ($dias_no != 0 && $dias_no != 6) {
+
+                    $fechas_array[] = date('Y-m-d', $i);
+                }
+            }
+
+            $conteo = count($fechas_array);
+
+            $inventarios = $_POST['inventario_ids'];
+
+            foreach ($inventarios as $inventario) {
+
+                // $equipos = ModeloInventario::getAiresMantenimientos($_POST['fecha_hasta'], $idInventario, $_POST['id_categoria']);
+                $info_equipo = ModeloInventario::obtenerDatosInventarioModel($inventario);
+
+                $id_inventario = $info_equipo['id'];
+
+                $id_user = $info_equipo['id_user'];
+
+                $id_area = $info_equipo['id_area'];
+
+
+                $fecha_aletorio = mt_rand(0, $conteo - 1);
+
+                $fecha_final = $fechas_array[$fecha_aletorio];
+
+
+                $datos = array(
+
+                    'id_log' => $_POST['id_log'],
+
+                    'id_inventario' => $id_inventario,
+
+                    'id_user' => $id_user,
+
+                    'id_area' => $id_area,
+
+                    'estado' => 6,
+
+                    'tipo_reporte' => 2,
+
+                    'fechareg' => $fecha_final . ' 10:30:00',
+
+                    'descripcion' => $_POST['descripcion'],
+                );
+
+                $mantenimientos = ModeloInventario::registrarMantenimientosModel($datos);
+
+
+
+                if ($mantenimientos['guardar'] == true) {
+
+
+
+                    $fecha_proxima = date("Y-m-d", strtotime($fecha_final . "+ 2 days"));
+
+                    $fecha_proxima_dia = date('w', strtotime($fecha_proxima));
+
+                    $fecha_proxima = ($fecha_proxima_dia == 0 && $fecha_proxima_dia == 6) ? date("Y-m-d", strtotime($fecha_proxima . "+ 2 days")) : $fecha_proxima;
+
+
+
+                    $datos_solucion = array(
+
+                        'id_log' => $_POST['id_log'],
+
+                        'id_inventario' => $id_inventario,
+
+                        'id_user' => $id_user,
+
+                        'id_area' => $id_area,
+
+                        'id_resp' => $_POST['id_log'],
+
+                        'id_reporte' => $mantenimientos['id'],
+
+                        'estado' => 3,
+
+                        'tipo_reporte' => 2,
+
+                        'fecha_respuesta' => $fecha_proxima . ' 10:30:00',
+
+                        'fechareg' => $fecha_proxima . ' 10:30:00'
+
+                    );
+
+
+
+                    $solucion = ModeloInventario::registrarSolucionMantenimientoControl($datos_solucion);
+                }
+            }
+
+            if ($solucion == true) {
+                echo '
+                <script>
+                ohSnap("Mantenimientos Registrados Correctamente!", {color: "green", "duration": "1000"});
+                setTimeout(recargarPagina,1050);
+
+                function recargarPagina(){
+                    window.location.replace("index");
+                }
+                </script>';
+            } else {
+                echo '
+                <script>
+                ohSnap("Error de Mantenimientos!", {color: "red", "duration": "1000"});
+                </script>';
+            }
+        }
+    }
+
+    public function programarMantenimientosSinSolucionControl()
+    {
+
+        if (
+            $_SERVER['REQUEST_METHOD'] == 'POST' &&
+
+            isset($_POST['id_log']) &&
+
+            !empty($_POST['id_log'])
+
+        ) {
+
+            set_time_limit(0);
+            ini_set('memory_limit', '512M');
+
+            $fecha_desde = strtotime($_POST['fecha_desde']);
+
+            $fecha_hasta = strtotime($_POST['fecha_hasta']);
+
+
+
+            $fechas_array = [];
+
+            if(isset($_POST['url'])){
+                $redir = 'index';
+            }else{
+                $redir = "index";
+            }
+
+
+
+            for ($i = $fecha_desde; $i <= $fecha_hasta; $i += 86400) {
+                $dias_no = date('w', $i);
+
+                if ($dias_no != 0 && $dias_no != 6) {
+                    $fechas_array[] = date('Y-m-d', $i);
+                }
+            }
+
+            $conteo = count($fechas_array);
+
+            $categoria = $_POST['id_categoria'];
+
+            $inventario = $_POST['inventario_ids'];
+
+            foreach ($inventario as $equipo) {
+
+                $equipos_computo = ModeloInventario::obtenerDatosInventarioModel($equipo);
+
+                $id_inventario = $equipos_computo['id'];
+
+                $id_user = $equipos_computo['id_user'];
+
+                $id_area = $equipos_computo['id_area'];
+
+
+                $fecha_aletorio = mt_rand(0, $conteo - 1);
+
+                $fecha_final = $fechas_array[$fecha_aletorio];
+
+
+
+                $datos = array(
+
+                    'id_log' => $_POST['id_log'],
+
+                    'id_inventario' => $id_inventario,
+
+                    'id_user' => $id_user,
+
+                    'id_area' => $id_area,
+
+                    'estado' => 6,
+
+                    'tipo_reporte' => 2,
+
+                    'fechareg' => $fecha_final . ' 10:30:00',
+
+                    'descripcion' => $_POST['descripcion']
+
+                );
+
+                $mantenimientos = ModeloInventario::registrarMantenimientosModel($datos);
+
+                if ($mantenimientos['guardar'] == true) {
+
+                    echo '
+
+                <script>
+
+                ohSnap("Mantenimientos Registrados Correctamente!", {color: "green", "duration": "1000"});
+
+                setTimeout(recargarPagina,1050);
+
+
+
+                function recargarPagina(){
+
+                    window.location.replace("' . $redir . '");
+
+                }
+
+                </script>';
+                } else {
+                    var_dump("Fallado");
+                    echo '
+                        <script>
+                            ohSnap("Error de Mantenimientos!", {color: "red", "duration": "1000"});
+                        </script>';
+                }
+            }
+        }
+    }
+
+    public function mostrarEquiposEnMantenimientoPreventivoControl(){
+        $mostrar = ModeloInventario::mostrarEquiposEnMantenimientoPreventivo();
+        return $mostrar;
+    }
+
+    public function confirmarMantenimientoInventarioControl(){
+        if(isset($_POST['solucionar'])){
+
+            if(isset($_POST['url'])){
+
+                $redir = "index";
+
+                if($_POST['url'] == 2){
+                    $redir = "index";
+                }
+            }
+
+            $datos_solucion = array(
+                    'id_log' => $_POST['id_log'],
+                    'id_inventario' => $_POST['id_inventario'],
+                    'id_user' => $_POST['id_user'],
+                    'id_area' => $_POST['id_area'],
+                    'id_resp' => 13,
+                    'id_reporte' => $_POST['id_reporte'],
+                    'estado' => 3,
+                    'tipo_reporte' => 2,
+                    'fecha_respuesta' => $_POST['fecha_respuesta'],
+                    'fechareg' => $_POST['fecha_respuesta']
+                    );
+
+            $solucion = ModeloInventario::registrarSolucionMantenimientoHebreoModel($datos_solucion);
+            
+            if ($solucion == true) {
+                echo '
+                <script>
+                ohSnap("Mantenimientos Registrados Correctamente!", {color: "green", "duration": "1000"});
+                setTimeout(recargarPagina,1050);
+
+                function recargarPagina(){
+                    window.location.replace("' . $redir . '");
+                }
+                </script>';
+            } else {
+                var_dump("Fallado");
+                echo '
+
+                <script>
+                    ohSnap("Error de Mantenimientos!", {color: "red", "duration": "1000"});
+                </script>';
+            }
+
+        }
+    }
+
+    public function getHistorialMantenimientoControl(){
+        $mostrar = ModeloInventario::getHistorialMantenimientoModel();
+        return $mostrar;
+    }
+
+    public function getHistorialMantenimientoFiltradoControl($datos){
+        
+        $anio = (isset($datos['anio_inicio']) && isset($datos['anio_final']) && $datos['anio_inicio'] != '' && $datos['anio_final'] != '') ? ' AND r.fechareg BETWEEN ' . "'" . $datos['anio_inicio'] . "'" . ' AND ' . "'" . $datos['anio_final'] . "'" : '';
+        $categoria = (isset($datos['categoria']) && $datos['categoria'] != '') ? ' AND iv.id_categoria = ' . $datos['categoria'] : '';
+        
+        $mostrar = ModeloInventario::getHistorialMantenimientoFiltradoModel($anio, $categoria);
         return $mostrar;
     }
 }

@@ -6,7 +6,7 @@
       </div>
       <div class="modal-body">
         <form method="POST" novalidate>
-          <input type="hidden" name="id_log" value="<?=$id_log ?? ''?>">
+          <input type="hidden" name="id_log" value="<?= $id_log ?? '' ?>">
 
           <div class="row p-2">
             <div class="col-lg-12 form-group">
@@ -17,7 +17,7 @@
               <label class="font-weight-bold">Escoja una categoría <span class="text-danger">*</span></label>
               <select name="id_categoria" id="id_categoria" class="form-control" required>
                 <option value="" disabled selected>--- --- ---</option>
-                <?php foreach($datos_categorias as $categoria_item): ?>
+                <?php foreach ($datos_categorias as $categoria_item): ?>
                   <option value="<?= intval($categoria_item['id']) ?>"><?= htmlspecialchars($categoria_item['nombre']) ?></option>
                 <?php endforeach; ?>
               </select>
@@ -40,14 +40,30 @@
               </div>
             </div>
 
+            <div class="col-lg-12 form-group" id="contenedor_inventario" style="display: none;">
+              <label class="font-weight-bold">Seleccione los articulos para programar mantenimiento</label>
+              <div id="lista_inventario" class="row"></div>
+            </div>
+
             <div class="col-lg-12 form-group text-right mt-2">
               <button class="btn btn-danger btn-sm" type="button" data-dismiss="modal">
-                <i class="fa fa-times"></i>&nbsp; Cancelar
+                <i class="fa fa-times"></i>
+                &nbsp;
+                Cancelar
               </button>
 
-              <button class="btn btn-primary btn-sm" type="submit" name="mant_sistemas">
-                <i class="fa fa-save"></i>&nbsp; Guardar
+              <button class="btn btn-primary btn-sm" type="submit" name="mantenimiento_solucion">
+                <i class="fa fa-save"></i>
+                &nbsp;
+                Generar Mantenimientos Solución
               </button>
+
+              <button class="btn btn-hebreo btn-sm" type="submit" name="reporte_preventivo">
+                <i class="fa fa-save"></i>
+                &nbsp;
+                Generar mantenimiento
+              </button>
+
             </div>
           </div>
         </form>
