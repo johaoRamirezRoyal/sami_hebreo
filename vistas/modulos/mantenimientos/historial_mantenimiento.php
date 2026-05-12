@@ -182,8 +182,14 @@ $datos_categorias = $instancia->mostrarCategoriasControl($id_super_empresa);
 
                                         if ($estado == 6) {
 
+                                            $span_estado = '<span class="badge badge-warning">Pendiente</span>';
+
+                                        } else if($estado == 3) {
+
                                             $span_estado = '<span class="badge badge-success">Realizado</span>';
 
+                                        } else {
+                                            $span_estado = '<span class="badge badge-info">... </span>';
                                         }
                                        
 
