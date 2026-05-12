@@ -4121,7 +4121,7 @@ ORDER BY iv.id DESC;";
     public static function obtenerInventarioPorIdCategoriaModel($id_categoria){
         $tabla = "inventario";
         $cnx = conexion::singleton_conexion();
-        $cmdsql = "SELECT *, a.nombre AS nom_area
+        $cmdsql = "SELECT i.*, a.nombre AS nom_area
                     FROM $tabla i 
                     LEFT JOIN areas a ON a.id = i.id_area 
                     WHERE i.id_categoria = $id_categoria";
@@ -4233,7 +4233,8 @@ ORDER BY iv.id DESC;";
                     iv.id AS id_inventario
                     FROM $tabla r
                     INNER JOIN inventario iv ON iv.id = r.id_inventario
-                    AND r.estado = 6
+                    LEFT JOIN reportes r2 ON r.id = r2.id_reporte
+                    WHERE ((r.estado = 6 AND r2.id_reporte IS NULL) OR r.estado = 3)
                     ORDER BY r.id DESC
                     LIMIT 50;";
         try{
@@ -4260,7 +4261,8 @@ ORDER BY iv.id DESC;";
                     iv.id AS id_inventario
                     FROM $tabla r
                     INNER JOIN inventario iv ON iv.id = r.id_inventario
-                    WHERE r.estado = 6 
+                    LEFT JOIN reportes r2 ON r.id = r2.id_reporte
+                    WHERE ((r.estado = 6 AND r2.id_reporte IS NULL) OR r.estado = 3)
                     $anio 
                     $categoria
                     ORDER BY r.id DESC";

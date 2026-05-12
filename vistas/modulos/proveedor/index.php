@@ -98,7 +98,7 @@ if (!$permisos) {
 
 									$ver_documentos = ($documentos_proveedor['contar'] == 3) ? 'd-none' : '';
 
-									$ver_evaluacion      = ($evaluacion_proveedor['id'] == '' && $documentos_proveedor['contar'] == 3) ? '' : 'd-none';
+									$ver_evaluacion      = ($evaluacion_proveedor['id'] == '' && $documentos_proveedor['contar'] >= 3) ? '' : 'd-none';
 									$ver_span_evaluacion = ($evaluacion_proveedor['id'] != '') ? '' : 'd-none';
 
 									?>

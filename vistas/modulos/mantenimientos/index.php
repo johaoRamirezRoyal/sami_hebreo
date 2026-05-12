@@ -96,6 +96,7 @@ if (!$permisos) {
                             <thead>
                                 <tr class="text-center font-weight-bold">
                                     <th scope="col">ID</th>
+                                    <th scope="col">Inventario</th>
                                     <th scope="col">Usuario</th>
                                     <th scope="col">Area</th>
                                     <th scope="col">Descripcion</th>
@@ -121,7 +122,8 @@ if (!$permisos) {
                                     $id_user          = $inventario['id_user'];
                                     $id_area          = $inventario['id_area'];
                                     $id_categoria     = $inventario['id_categoria'];
-
+                                    
+                                    $inventario       = $inventario['nom_inventario'];
                                     /*
                                     $fecha      = date('Y-m', strtotime($inventario['ultimo_mant']));
                                     $nuevafecha = strtotime('+' . $frecuencia . ' month', strtotime($fecha));
@@ -145,6 +147,7 @@ if (!$permisos) {
                                 ?>
                                         <tr class="text-center">
                                             <td><?= $id_inventario ?></td>
+                                            <td><?= $inventario ?></td>
                                             <td><?= $usuario ?></td>
                                             <td><?= $area ?></td>
                                             <td><?= $hoja_vida ?></td>
