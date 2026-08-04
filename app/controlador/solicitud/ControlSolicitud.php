@@ -20,31 +20,79 @@ class ControlSolicitud
         return self::$instancia;
     }
 
-    public function mostrarSolicitudesControl()
+    public function mostrarSolicitudesControl($limite = 100)
     {
-        $mostrar = ModeloSolicitud::mostrarSolicitudesModel();
+        $mostrar = ModeloSolicitud::mostrarSolicitudesModel($limite);
         return $mostrar;
     }
 
-    public function mostrarSolicitudesAprobadasCoordinadorControl(){
-        $mostrar = ModeloSolicitud::mostrarSolicitudesAprobadasCoordinadorModel();
+    public function mostrarSolicitudesAprobadasCoordinadorControl($limite = 100){
+        $mostrar = ModeloSolicitud::mostrarSolicitudesAprobadasCoordinadorModel($limite);
         return $mostrar;
     }
 
-    public function mostrarSolucitudesNivelControl($id_nivel){
-        $mostrar = ModeloSolicitud::mostrarSolucitudesNivelModel($id_nivel);
+    public function buscarSolicitudesAprobadasCoordinadorControl($datos)
+    {
+        $buscar       = (!empty($datos['buscar'])) ? trim($datos['buscar']) : '';
+        $fecha_inicio = (!empty($datos['fecha_inicio'])) ? trim($datos['fecha_inicio']) : '';
+        $fecha_fin    = (!empty($datos['fecha_fin'])) ? trim($datos['fecha_fin']) : '';
+        $area         = (!empty($datos['area'])) ? trim($datos['area']) : '';
+        $usuario      = (!empty($datos['usuario'])) ? trim($datos['usuario']) : '';
+        $grado        = (!empty($datos['grado'])) ? trim($datos['grado']) : '';
+
+        $datos = array(
+            'buscar'       => $buscar,
+            'fecha_inicio' => $fecha_inicio,
+            'fecha_fin'    => $fecha_fin,
+            'area'         => $area,
+            'usuario'      => $usuario,
+            'grado'        => $grado,
+        );
+
+        $mostrar = ModeloSolicitud::buscarSolicitudesAprobadasCoordinadorModel($datos);
+        return $mostrar;
+    }
+
+    public function mostrarSolucitudesNivelControl($id_nivel, $limite = 100){
+        $mostrar = ModeloSolicitud::mostrarSolucitudesNivelModel($id_nivel, $limite);
         return $mostrar;
     }
 
     public function buscarSolicitudesControl($datos)
     {
-        $area = (!empty($datos['area'])) ? ' AND s.id_area = ' . $datos['area']  : '';
-        $fecha = (!empty($datos['fecha'])) ? ' AND s.fecha_solicitud = "' . $datos['fecha'] . '"' : '';
-        $usuario = (!empty($datos['usuario'])) ? ' AND s.id_user = ' . $datos['usuario'] : '';
+        $buscar  = (!empty($datos['buscar'])) ? trim($datos['buscar']) : '';
+        $fecha   = (!empty($datos['fecha'])) ? trim($datos['fecha']) : '';
+        $area    = (!empty($datos['area'])) ? trim($datos['area']) : '';
+        $usuario = (!empty($datos['usuario'])) ? trim($datos['usuario']) : '';
+        $nivel   = (!empty($datos['nivel'])) ? trim($datos['nivel']) : '';
 
-        $datos = array('area' => $area, 'fecha' => $fecha, 'usuario' => $usuario);
+        $datos = array(
+            'buscar'  => $buscar,
+            'fecha'   => $fecha,
+            'area'    => $area,
+            'usuario' => $usuario,
+            'nivel'   => $nivel,
+        );
 
         $mostrar = ModeloSolicitud::buscarSolicitudesModel($datos);
+        return $mostrar;
+    }
+
+    public function buscarSolicitudesCotizacionControl($datos)
+    {
+        $buscar  = (!empty($datos['buscar'])) ? trim($datos['buscar']) : '';
+        $fecha   = (!empty($datos['fecha'])) ? trim($datos['fecha']) : '';
+        $area    = (!empty($datos['area'])) ? trim($datos['area']) : '';
+        $usuario = (!empty($datos['usuario'])) ? trim($datos['usuario']) : '';
+
+        $datos = array(
+            'buscar'  => $buscar,
+            'fecha'   => $fecha,
+            'area'    => $area,
+            'usuario' => $usuario,
+        );
+
+        $mostrar = ModeloSolicitud::buscarSolicitudesCotizacionModel($datos);
         return $mostrar;
     }
 

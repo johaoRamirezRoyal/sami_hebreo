@@ -94,9 +94,10 @@ class ModeloSolicitud extends conexion
         $cnx = null;
     }
 
-    public static function mostrarSolucitudesNivelModel($id_nivel){
+    public static function mostrarSolucitudesNivelModel($id_nivel, $limite = 100){
         $tabla  = 'solicitudes';
         $cnx    = conexion::singleton_conexion();
+        $limite = (int) $limite;
         $cmdsql = "SELECT
                     s.*,
                     (SELECT a.nombre FROM areas a WHERE a.id = s.id_area) AS area_nom,
@@ -108,7 +109,7 @@ class ModeloSolicitud extends conexion
                 JOIN usuarios u ON u.id_user = s.id_user
                 WHERE u.id_nivel = $id_nivel -- nivel a filtrar
                 ORDER BY s.id DESC 
-                LIMIT 100;";
+                LIMIT $limite;";
         try{
             $preparado = $cnx->preparar($cmdsql);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
@@ -124,10 +125,11 @@ class ModeloSolicitud extends conexion
         $cnx = null;
     }
 
-    public static function mostrarSolicitudesModel()
+    public static function mostrarSolicitudesModel($limite = 100)
     {
         $tabla  = 'solicitudes';
         $cnx    = conexion::singleton_conexion();
+        $limite = (int) $limite;
         $cmdsql =  "SELECT
         s.*,
         (SELECT a.nombre FROM areas a WHERE a.id = s.id_area) AS area_nom,
@@ -135,7 +137,7 @@ class ModeloSolicitud extends conexion
         (SELECT CONCAT(u.nombre, ' ', u.apellido) FROM usuarios u WHERE u.id_user = s.id_user) AS nom_usuario,
         (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id ORDER BY c.id DESC LIMIT 1) AS cotizacion,
         (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id AND c.aprobado = 1 ORDER BY c.id DESC LIMIT 1) AS cotizacion_aprobada
-        FROM solicitudes s ORDER BY s.id DESC LIMIT 100;";
+        FROM solicitudes s ORDER BY s.id DESC LIMIT $limite;";
         try {
             $preparado = $cnx->preparar($cmdsql);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
@@ -151,9 +153,10 @@ class ModeloSolicitud extends conexion
         $cnx = null;
     }
 
-    public static function mostrarSolicitudesAprobadasCoordinadorModel(){
+    public static function mostrarSolicitudesAprobadasCoordinadorModel($limite = 100){
         $tabla  = 'solicitudes';
         $cnx    = conexion::singleton_conexion();
+        $limite = (int) $limite;
         $cmdsql = "SELECT
         s.*,
         (SELECT a.nombre FROM areas a WHERE a.id = s.id_area) AS area_nom,
@@ -163,7 +166,7 @@ class ModeloSolicitud extends conexion
         (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id AND c.aprobado = 1 ORDER BY c.id DESC LIMIT 1) AS cotizacion_aprobada
         FROM $tabla s 
         WHERE s.estado = 1
-        ORDER BY s.id DESC LIMIT 100;";
+        ORDER BY s.id DESC LIMIT $limite;";
         try {
             $preparado = $cnx->preparar($cmdsql);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
@@ -179,9 +182,46 @@ class ModeloSolicitud extends conexion
         $cnx = null;
     }
 
-    public static function buscarSolicitudesModel($datos){
-        $tabla  = 'solicitudes';
-        $cnx    = conexion::singleton_conexion();
+    public static function buscarSolicitudesAprobadasCoordinadorModel($datos)
+    {
+        $tabla = 'solicitudes';
+        $cnx   = conexion::singleton_conexion();
+
+        $where  = array('s.estado = 1');
+        $params = array();
+
+        if (!empty($datos['buscar'])) {
+            $where[] = "s.justificacion LIKE :buscar";
+            $params[':buscar'] = '%' . $datos['buscar'] . '%';
+        }
+
+        if (!empty($datos['fecha_inicio'])) {
+            $where[] = "s.fecha_solicitud >= :fecha_inicio";
+            $params[':fecha_inicio'] = $datos['fecha_inicio'];
+        }
+
+        if (!empty($datos['fecha_fin'])) {
+            $where[] = "s.fecha_solicitud <= :fecha_fin";
+            $params[':fecha_fin'] = $datos['fecha_fin'];
+        }
+
+        if (!empty($datos['area'])) {
+            $where[] = "s.id_area = :area";
+            $params[':area'] = $datos['area'];
+        }
+
+        if (!empty($datos['usuario'])) {
+            $where[] = "s.id_user = :usuario";
+            $params[':usuario'] = $datos['usuario'];
+        }
+
+        if (!empty($datos['grado'])) {
+            $where[] = "s.grado = :grado";
+            $params[':grado'] = $datos['grado'];
+        }
+
+        $whereSql = 'WHERE ' . implode(' AND ', $where);
+
         $cmdsql = "SELECT
         s.*,
         (SELECT a.nombre FROM areas a WHERE a.id = s.id_area) AS area_nom,
@@ -189,13 +229,144 @@ class ModeloSolicitud extends conexion
         (SELECT CONCAT(u.nombre, ' ', u.apellido) FROM usuarios u WHERE u.id_user = s.id_user) AS nom_usuario,
         (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id ORDER BY c.id DESC LIMIT 1) AS cotizacion,
         (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id AND c.aprobado = 1 ORDER BY c.id DESC LIMIT 1) AS cotizacion_aprobada
-        FROM solicitudes s WHERE CONCAT(s.justificacion) LIKE '% %'
-        " . $datos['fecha'] . "
-        " . $datos['area'] . "
+        FROM $tabla s
+        " . $whereSql . "
         ORDER BY s.id DESC;";
+
         try {
             $preparado = $cnx->preparar($cmdsql);
-            $preparado->bindParam(':id', $datos['id']);
+            foreach ($params as $key => $value) {
+                $preparado->bindValue($key, $value);
+            }
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function buscarSolicitudesModel($datos)
+    {
+        $tabla = 'solicitudes';
+        $cnx   = conexion::singleton_conexion();
+
+        $where  = array();
+        $params = array();
+
+        if (!empty($datos['buscar'])) {
+            $buscar = '%' . $datos['buscar'] . '%';
+            $where[] = "(s.id LIKE :buscar OR s.justificacion LIKE :buscar2 OR s.motivo LIKE :buscar3)";
+            $params[':buscar']  = $buscar;
+            $params[':buscar2'] = $buscar;
+            $params[':buscar3'] = $buscar;
+        }
+
+        if (!empty($datos['fecha'])) {
+            $where[] = "s.fecha_solicitud = :fecha";
+            $params[':fecha'] = $datos['fecha'];
+        }
+
+        if (!empty($datos['area'])) {
+            $where[] = "s.id_area = :area";
+            $params[':area'] = $datos['area'];
+        }
+
+        if (!empty($datos['usuario'])) {
+            $where[] = "s.id_user = :usuario";
+            $params[':usuario'] = $datos['usuario'];
+        }
+
+        if (!empty($datos['nivel'])) {
+            $where[] = "s.id_user IN (SELECT u.id_user FROM usuarios u WHERE u.id_nivel = :nivel)";
+            $params[':nivel'] = $datos['nivel'];
+        }
+
+        $whereSql = count($where) > 0 ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $cmdsql = "SELECT
+        s.*,
+        (SELECT a.nombre FROM areas a WHERE a.id = s.id_area) AS area_nom,
+        (SELECT c.nombre FROM curso c WHERE c.id = s.grado) AS nom_curso,
+        (SELECT CONCAT(u.nombre, ' ', u.apellido) FROM usuarios u WHERE u.id_user = s.id_user) AS nom_usuario,
+        (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id ORDER BY c.id DESC LIMIT 1) AS cotizacion,
+        (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id AND c.aprobado = 1 ORDER BY c.id DESC LIMIT 1) AS cotizacion_aprobada
+        FROM $tabla s
+        " . $whereSql . "
+        ORDER BY s.id DESC LIMIT 100;";
+
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            foreach ($params as $key => $value) {
+                $preparado->bindValue($key, $value);
+            }
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function buscarSolicitudesCotizacionModel($datos)
+    {
+        $tabla = 'solicitudes';
+        $cnx   = conexion::singleton_conexion();
+
+        $where  = array();
+        $params = array();
+
+        if (!empty($datos['buscar'])) {
+            $buscar = '%' . $datos['buscar'] . '%';
+            $where[] = "(s.id LIKE :buscar OR s.justificacion LIKE :buscar2 OR s.motivo LIKE :buscar3)";
+            $params[':buscar']  = $buscar;
+            $params[':buscar2'] = $buscar;
+            $params[':buscar3'] = $buscar;
+        }
+
+        if (!empty($datos['fecha'])) {
+            $where[] = "s.fecha_solicitud = :fecha";
+            $params[':fecha'] = $datos['fecha'];
+        }
+
+        if (!empty($datos['area'])) {
+            $where[] = "s.id_area = :area";
+            $params[':area'] = $datos['area'];
+        }
+
+        if (!empty($datos['usuario'])) {
+            $where[] = "s.id_user = :usuario";
+            $params[':usuario'] = $datos['usuario'];
+        }
+
+        $whereSql = count($where) > 0 ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $cmdsql = "SELECT
+        s.*,
+        (SELECT a.nombre FROM areas a WHERE a.id = s.id_area) AS area_nom,
+        (SELECT c.nombre FROM curso c WHERE c.id = s.grado) AS nom_curso,
+        (SELECT CONCAT(u.nombre, ' ', u.apellido) FROM usuarios u WHERE u.id_user = s.id_user) AS nom_usuario,
+        (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id ORDER BY c.id DESC LIMIT 1) AS cotizacion,
+        (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id AND c.aprobado = 1 ORDER BY c.id DESC LIMIT 1) AS cotizacion_aprobada
+        FROM $tabla s
+        " . $whereSql . "
+        ORDER BY s.id DESC LIMIT 100;";
+
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            foreach ($params as $key => $value) {
+                $preparado->bindValue($key, $value);
+            }
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
             if ($preparado->execute()) {
                 return $preparado->fetchAll();

@@ -33,7 +33,7 @@ if (!$permisos) {
 			<div class="card shadow-sm mb-4">
 				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 					<h4 class="m-0 font-weight-bold text-hebreo">
-						<a href="<?=BASE_URL?>compras/index" class="text-decoration-none">
+						<a href="<?=BASE_URL?>solicitud/index" class="text-decoration-none">
 							<i class="fa fa-arrow-left text-hebreo"></i>
 						</a>
 						&nbsp;
