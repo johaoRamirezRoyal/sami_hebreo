@@ -712,7 +712,7 @@ public function cancelarPermiso() {
                 $correo_asistente = $informacion_asistente['correo'];
 
                 if(($correo_coordinador === null || $correo_coordinador === '') && 
-                    ($datos_permiso['nivel_user'] == 1 || $datos_permiso['nivel_user'] == 6)){
+                    ($datos_permiso['nivel_user'] == 1 || $datos_permiso['nivel_user'] == 6 || $datos['nivel_user'] == 7)){
                     $correo_coordinador = 'ghumana@colegiohebreounion.edu.co' ;
                 }
 
