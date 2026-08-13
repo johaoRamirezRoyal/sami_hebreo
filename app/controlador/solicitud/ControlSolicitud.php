@@ -835,7 +835,8 @@ class ControlSolicitud
                     <li><b>Fecha de solicitud:</b> ' . $datos_solicitud['fecha_solicitud'] . '</li>
                     <li><b>Area:</b> ' . $datos_solicitud['area_nom'] . ' </li>
                     <li><b>Grado:</b> ' . $curso . '</li>
-                    <li><b>Solicitante:</b> ' . $datos_usuario['nombre'] . ' ' . $datos_usuario['apellido'] . '</li>
+                    <li><b>Solicitante:</b> ' . $datos_solicitud['nom_usuario'] . '</li>
+                    <li><b>Aprobado por:</b> ' . $datos_usuario['nombre'] . ' ' . $datos_usuario['apellido'] . '</li>
                     <li><b>Justificacion:</b> ' . $datos_solicitud['justificacion'] . '</li>
                     <li><b>Estado:</b> Aprobado</li>
                     <li><b>Observacion:</b> ' . $_POST['observacion'] . '</li>
@@ -847,7 +848,7 @@ class ControlSolicitud
                     $datos_correo = array(
                         'asunto' => 'Solicitud de compra No. ' . $_POST['id_solicitud'] . ' - Aprobada',
                         'correo' => array($datos_usuario['correo']),
-                        //'correo'  => array('jesuspolo00@gmail.com'),
+                        //'correo'  => array('aprendiz.sistemas@royalschool.edu.co'),
                         'user' => 'Administrador',
                         'mensaje' => $mensaje_usuario,
                         'archivo' => array(''),
