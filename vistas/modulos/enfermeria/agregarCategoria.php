@@ -11,12 +11,16 @@
       <div class="modal-body">
         <form method="POST">
           <input type="hidden" name="id_log" value="<?=$id_log?>">
-          <div class="row p-2">
-            <div class="col-lg-12 form-group">
-              <label class="font-weight-bold">Nombre Categoria <span class="text-danger">*</span></label>
-              <input type="text" name="nom_categoria" class="form-control" required>
-            </div>
-            <div class="col-lg-12 form-group text-right mt-2">
+            <div class="row p-2">
+              <div class="col-lg-12 form-group">
+                <label class="font-weight-bold">Nombre Categoria <span class="text-danger">*</span></label>
+                <input type="text" name="nom_categoria" class="form-control" required>
+              </div>
+              <div class="col-lg-12 form-group">
+                <label class="font-weight-bold">Atencion Rapida</label>
+                <textarea name="atencion_rapida" class="form-control" rows="4" placeholder="Atencion predeterminada para esta categoria..."></textarea>
+              </div>
+              <div class="col-lg-12 form-group text-right mt-2">
               <button class="btn btn-danger btn-sm" type="button" data-dismiss="modal">
                 <i class="fa fa-times"></i>
                 &nbsp;

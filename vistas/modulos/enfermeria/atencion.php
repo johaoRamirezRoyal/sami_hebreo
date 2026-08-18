@@ -76,7 +76,7 @@ if (isset($_GET['usuario'])) {
                                 </div>
                                 <div class="col-lg-4 form-group">
                                     <label class="font-weight-bold">Motivo de consulta <span class="text-danger">*</span></label>
-                                    <select class="form-control" name="motivo" required>
+                                    <select class="form-control" name="motivo" id="motivo_consulta" required>
                                         <option value="">Selecciona una opcion...</option>
                                         <?php
                                         foreach ($datos_categoria as $categoria) {
@@ -91,7 +91,7 @@ if (isset($_GET['usuario'])) {
                                 </div>
                                 <div class="col-lg-12 form-group">
                                     <label class="font-weight-bold">Tratamiento <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" rows="5" name="tratamiento"></textarea>
+                                    <textarea class="form-control" rows="5" name="tratamiento" id="tratamiento_atencion"></textarea>
                                 </div>
                                 <div class="col-lg-12 form-group">
                                     <label class="font-weight-bold">Envio de correo a padres <span class="text-danger">*</span></label>
