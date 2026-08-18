@@ -189,13 +189,15 @@ class ModeloSolicitud extends conexion
         (SELECT CONCAT(u.nombre, ' ', u.apellido) FROM usuarios u WHERE u.id_user = s.id_user) AS nom_usuario,
         (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id ORDER BY c.id DESC LIMIT 1) AS cotizacion,
         (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id AND c.aprobado = 1 ORDER BY c.id DESC LIMIT 1) AS cotizacion_aprobada
-        FROM solicitudes s WHERE CONCAT(s.justificacion) LIKE '% %'
+        FROM solicitudes s
+        JOIN usuarios u ON u.id_user = s.id_user
+        WHERE CONCAT(s.justificacion) LIKE '% %'
+        " . $datos['nivel'] . "
         " . $datos['fecha'] . "
         " . $datos['area'] . "
         ORDER BY s.id DESC;";
         try {
             $preparado = $cnx->preparar($cmdsql);
-            $preparado->bindParam(':id', $datos['id']);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
             if ($preparado->execute()) {
                 return $preparado->fetchAll();

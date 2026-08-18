@@ -21,9 +21,9 @@ $instancia       = ControlSolicitud::singleton_solicitud();
 $instancia_areas = ControlAreas::singleton_areas();
 $instancia_usuarios = ControlUsuarios::singleton_usuarios();
 
-$datos_solicitud = $instancia->mostrarSolucitudesNivelControl($nivel);
-
-if($perfil_log == 26 || $perfil_log == 1){
+if($perfil_log == 22){
+	$datos_solicitud = $instancia->mostrarSolucitudesNivelControl($nivel);
+}else{
 	$datos_solicitud = $instancia->mostrarSolicitudesControl();
 }
 
@@ -31,10 +31,11 @@ if(isset($_POST['buscar'])){
 	$datos = array(
 		'buscar' => $_POST['buscar'],
 		'fecha' => $_POST['fecha'],
-		'area' => $_POST['area'],
+		'area' => $_POST['area'] ?? '',
 		'usuario' => $_POST['usuario'],
 	);
-	$datos_solicitud = $instancia->buscarSolicitudesControl($datos);
+	$nivel_filtro = ($perfil_log == 22) ? $nivel : null;
+	$datos_solicitud = $instancia->buscarSolicitudesControl($datos, $nivel_filtro);
 }
 
 $permisos = $instancia_permiso->permisosUsuarioControl(60, $perfil_log);
@@ -66,19 +67,21 @@ if (!$permisos) {
 				<div class="card-body">
 					<form method="POST">
 						<div class="row">
-							<div class="col-lg-3 form-group">
-								<select name="area" class="form-control select2" data-tooltip="tooltip" title="Seleccionar area">
-									<option value="">Seleccionar area</option>
-									<?php
-									$datos_areas = $instancia_areas->mostrarAreasControl(1);
-									foreach ($datos_areas as $area) {
-										?>
-										<option value="<?=$area['id']?>"><?=$area['nombre']?></option>
-										<?php
-									}
+<?php if ($perfil_log != 22): ?>
+						<div class="col-lg-3 form-group">
+							<select name="area" class="form-control select2" data-tooltip="tooltip" title="Seleccionar area">
+								<option value="">Seleccionar area</option>
+								<?php
+								$datos_areas = $instancia_areas->mostrarAreasControl(1);
+								foreach ($datos_areas as $area) {
 									?>
-								</select>
-							</div>
+									<option value="<?=$area['id']?>"><?=$area['nombre']?></option>
+									<?php
+								}
+								?>
+							</select>
+						</div>
+						<?php endif; ?>
 							<div class="col-lg-3 form-group">
 								<input type="date" class="form-control" name="fecha" placeholder="Fecha" data-tooltip="tooltip" title="Fecha">
 							</div>
@@ -86,7 +89,7 @@ if (!$permisos) {
 								<select name="usuario" id="" class="form-control select2" data-tooltip="tooltip" title="Seleccionar usuario">
 									<option value="">Seleccionar usuario</option>
 									<?php
-									$datos_usuarios = $instancia_usuarios->mostrarTodosUsuariosControl(1);
+									$datos_usuarios = $instancia_usuarios->mostrarTodosUsuariosControl(($perfil_log == 22) ? $nivel : null);
 									foreach ($datos_usuarios as $usuario) {
 										?>
 										<option value="<?=$usuario['id']?>"><?=$usuario['nombre']?></option>

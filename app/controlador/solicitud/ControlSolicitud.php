@@ -36,13 +36,14 @@ class ControlSolicitud
         return $mostrar;
     }
 
-    public function buscarSolicitudesControl($datos)
+    public function buscarSolicitudesControl($datos, $nivel = null)
     {
         $area = (!empty($datos['area'])) ? ' AND s.id_area = ' . $datos['area']  : '';
         $fecha = (!empty($datos['fecha'])) ? ' AND s.fecha_solicitud = "' . $datos['fecha'] . '"' : '';
         $usuario = (!empty($datos['usuario'])) ? ' AND s.id_user = ' . $datos['usuario'] : '';
+        $nivel = (!empty($nivel)) ? ' AND u.id_nivel = ' . (int)$nivel : '';
 
-        $datos = array('area' => $area, 'fecha' => $fecha, 'usuario' => $usuario);
+        $datos = array('area' => $area, 'fecha' => $fecha, 'usuario' => $usuario, 'nivel' => $nivel);
 
         $mostrar = ModeloSolicitud::buscarSolicitudesModel($datos);
         return $mostrar;

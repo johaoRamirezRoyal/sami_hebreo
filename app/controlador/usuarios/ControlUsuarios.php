@@ -65,10 +65,10 @@ class ControlUsuarios
         return $mostrar;
     }
 
-    public function mostrarTodosUsuariosControl()
+    public function mostrarTodosUsuariosControl($nivel = null)
     {
         $consulta = ModeloUsuarios::comandoSQL();
-        $mostrar  = ModeloUsuarios::mostrarTodosUsuariosModel();
+        $mostrar  = ModeloUsuarios::mostrarTodosUsuariosModel($nivel);
         return $mostrar;
     }
 
