@@ -169,4 +169,41 @@ class ModeloAsistenciaCron extends conexion
         $cnx->closed();
         $cnx = null;
     }
+
+    public static function buscarAsistenciaMesActual($datos)
+    {
+        $tabla  = 'asistencia_gestion';
+        $cnx    = conexion::singleton_conexion();
+
+
+        $cmdsql = "SELECT
+            u.documento,
+            CONCAT(u.nombre, ' ', u.apellido) AS nom_user,
+            (SELECT nombre FROM perfiles WHERE id_perfil = u.perfil) AS perfil,
+            a.hora_asistencia, a.fecha_asistencia,
+            g.nombre as nom_grupo
+            FROM asistencia_gestion a
+            INNER JOIN usuarios u ON a.id_user = u.id_user
+            LEFT JOIN grupo g ON g.id = u.id_grupo
+            WHERE a.id_user = :id_log
+            AND MONTH(a.fecha_asistencia) = :mes
+            AND YEAR(a.fecha_asistencia) = :anio
+            ORDER BY a.id DESC";
+
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':id_log', $datos['id_log'], PDO::PARAM_INT);
+            $preparado->bindParam(':mes', $datos['mes'], PDO::PARAM_INT);
+            $preparado->bindParam(':anio', $datos['anio'], PDO::PARAM_INT);
+
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx = null;
+    }
 }
