@@ -8,11 +8,56 @@ class ModeloEnfermeria extends conexion
     {
         $tabla  = 'enfermeria_categoria';
         $cnx    = conexion::singleton_conexion();
-        $cmdsql = "INSERT INTO " . $tabla . " (nombre, id_log) VALUES (:n, :idl);";
+        $cmdsql = "INSERT INTO " . $tabla . " (nombre, atencion_rapida, id_log) VALUES (:n, :ar, :idl);";
         try {
             $preparado = $cnx->preparar($cmdsql);
             $preparado->bindParam(':n', $datos['nom_categoria']);
+            $preparado->bindParam(':ar', $datos['atencion_rapida']);
             $preparado->bindParam(':idl', $datos['id_log']);
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            if ($preparado->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function mostrarCategoriaPorIdModel($id)
+    {
+        $tabla  = 'enfermeria_categoria';
+        $cnx    = conexion::singleton_conexion();
+        $cmdsql = "SELECT * FROM " . $tabla . " WHERE id = :id AND activo = 1;";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':id', $id);
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            if ($preparado->execute()) {
+                return $preparado->fetch();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function editarCategoriaModel($datos)
+    {
+        $tabla  = 'enfermeria_categoria';
+        $cnx    = conexion::singleton_conexion();
+        $cmdsql = "UPDATE " . $tabla . " SET nombre = :n, atencion_rapida = :ar WHERE id = :id;";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':n', $datos['nom_categoria']);
+            $preparado->bindParam(':ar', $datos['atencion_rapida']);
+            $preparado->bindParam(':id', $datos['id_categoria']);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
             if ($preparado->execute()) {
                 return true;

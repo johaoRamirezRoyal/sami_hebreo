@@ -1317,6 +1317,7 @@ public function cancelarPermiso($id_permiso) {
                         SELECT uc.correo
                         FROM usuarios uc
                         WHERE uc.id_nivel = u.id_nivel
+                        AND uc.estado = 'activo'
                         AND uc.perfil = 22
                         LIMIT 1
                     ) AS correo_coordinador

@@ -30,6 +30,12 @@ class ControlEnfermeria
         return $mostrar;
     }
 
+    public function mostrarCategoriaPorIdControl($id)
+    {
+        $mostrar = ModeloEnfermeria::mostrarCategoriaPorIdModel($id);
+        return $mostrar;
+    }
+
     public function mostrarDatosUsuariosControl($documento)
     {
         $mostrar = ModeloEnfermeria::mostrarDatosUsuariosModel($documento);
@@ -146,8 +152,9 @@ class ControlEnfermeria
         ) {
 
             $datos = array(
-                'id_log'        => $_POST['id_log'],
-                'nom_categoria' => $_POST['nom_categoria'],
+                'id_log'          => $_POST['id_log'],
+                'nom_categoria'   => $_POST['nom_categoria'],
+                'atencion_rapida' => $_POST['atencion_rapida'],
             );
 
             $guardar = ModeloEnfermeria::registrarCategoriaModel($datos);
@@ -167,6 +174,44 @@ class ControlEnfermeria
                 echo '
                 <script>
                 ohSnap("Error al crear", {color: "red"});
+                </script>
+                ';
+            }
+
+        }
+    }
+
+    public function editarCategoriaControl()
+    {
+        if (
+            $_SERVER['REQUEST_METHOD'] == 'POST' &&
+            isset($_POST['id_categoria']) &&
+            !empty($_POST['id_categoria'])
+        ) {
+
+            $datos = array(
+                'id_categoria'    => $_POST['id_categoria'],
+                'nom_categoria'   => $_POST['nom_categoria'],
+                'atencion_rapida' => $_POST['atencion_rapida'],
+            );
+
+            $guardar = ModeloEnfermeria::editarCategoriaModel($datos);
+
+            if ($guardar == true) {
+                echo '
+                <script>
+                ohSnap("Actualizado correctamente!", {color: "green", "duration": "1000"});
+                setTimeout(recargarPagina,1050);
+
+                function recargarPagina(){
+                    window.location.replace("procedimiento");
+                }
+                </script>
+                ';
+            } else {
+                echo '
+                <script>
+                ohSnap("Error al actualizar", {color: "red"});
                 </script>
                 ';
             }

@@ -93,7 +93,7 @@ if (!$permisos) {
 								<select name="usuario" class="form-control select2" data-tooltip="tooltip" title="Seleccionar usuario">
 									<option value="">Todos los solicitantes</option>
 									<?php
-									$datos_usuarios = $instancia_usuarios->mostrarTodosUsuariosControl(1);
+									$datos_usuarios = $instancia_usuarios->mostrarTodosUsuariosControl(($perfil_log == 22) ? $nivel : null);
 									foreach ($datos_usuarios as $usuario) {
 										$selected = (!empty($_POST['usuario']) && (int)$_POST['usuario'] == (int)$usuario['id_user']) ? 'selected' : '';
 										?>
