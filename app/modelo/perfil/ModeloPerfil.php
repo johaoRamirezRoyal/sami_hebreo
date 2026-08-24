@@ -908,4 +908,52 @@ class ModeloPerfil extends conexion
         $cnx->closed();
         $cnx = null;
     }
+
+    public static function mostrarDatosCoordinadorModel($id_nivel)
+    {
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "SELECT u.correo,
+                    u.id_user, u.nombre, u.apellido, u.documento, u.perfil, u.id_nivel,
+                    CONCAT(u.nombre, ' ', u.apellido) AS nom_completo
+                    FROM usuarios u
+                    WHERE u.id_nivel = :id_nivel AND u.perfil = 22 AND u.estado = 'activo' LIMIT 1;";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':id_nivel', $id_nivel, PDO::PARAM_INT);
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            if ($preparado->execute()) {
+                return $preparado->fetch();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print 'Error!: ' . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function mostrarDatosComprasModel($id_perfil)
+    {
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "SELECT u.correo,
+                    u.id_user, u.nombre, u.apellido, u.documento, u.perfil, u.id_nivel,
+                    CONCAT(u.nombre, ' ', u.apellido) AS nom_completo
+                    FROM usuarios u
+                    WHERE u.perfil = :perfil AND u.estado = 'activo' LIMIT 1;";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':perfil', $id_perfil, PDO::PARAM_INT);
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            if ($preparado->execute()) {
+                return $preparado->fetch();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print 'Error!: ' . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
 }
