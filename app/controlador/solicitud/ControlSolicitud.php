@@ -318,7 +318,7 @@ class ControlSolicitud
                     $guardar_producto = ModeloSolicitud::registrarProdcuctosModel($datos_producto);
                 }
 
-                if ($guardar_producto == true) {
+                if ($guardar_producto['guardar'] == true) {
 
                     $datos_usuario = ModeloPerfil::mostrarDatosPerfilModel($_POST['id_log']);
                     $datos_solicitud = ModeloSolicitud::mostrarDatosSolicitudIdModel($_POST['id_solicitud']);
@@ -378,7 +378,7 @@ class ControlSolicitud
                     ';
 
                     $datos_correo_usuario = array(
-                        'asunto' => 'Solicitud de compra No. ' . $guardar['id'] . ' - Rechazada',
+                        'asunto' => 'Solicitud de compra No. ' . $_POST['id_solicitud'] . ' - Rechazada',
                         'correo' => array($datos_usuario['correo']),
                         //'correo'  => array('jesuspolo00@gmail.com'),
                         'user' => 'Administrador',
@@ -445,7 +445,7 @@ class ControlSolicitud
 
                 if ($verificacion == true) {
                     echo ' <script>
-                    window . open("' . BASE_URL . 'imprimir/solicitud/cartaEntrega?solicitud=' . base64_encode($_POST['id_solicitud']) . '")
+                    window.open("' . BASE_URL . 'imprimir/solicitud/cartaEntrega?solicitud=' . base64_encode($_POST['id_solicitud']) . '")
                     </script> ';
 
                     echo '
@@ -725,10 +725,9 @@ class ControlSolicitud
             <li><b>Fecha de solicitud:</b> ' . $datos_solicitud['fecha_solicitud'] . '</li>
             <li><b>Justificación:</b> ' . $datos_solicitud['justificacion'] . ' </li>
             <li><b>Grado:</b> ' . $datos_solicitud['curso_nom'] . '</li>
-            li><b>Area:</b> ' . $datos_solicitud['area_nom'] . '</li>   
+            <li><b>Area:</b> ' . $datos_solicitud['area_nom'] . '</li>
             <li><b>Solicitante:</b> ' . $datos_solicitud['nom_usuario'] . '</li>
             <li><b>Aprobado por:</b> ' . $datos_solicitud['nom_aprobado'] . '</li>
-            <li><b>Fecha de revisión:</b> ' . $datos_solicitud['fecha_revision'] . '</li>
             <li><b>Fecha de revisión:</b> ' . $datos_solicitud['fecha_revision'] . '</li>
             </ul>
             </p>

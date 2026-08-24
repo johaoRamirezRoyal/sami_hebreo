@@ -179,36 +179,6 @@ class ModeloSolicitud extends conexion
         $cnx = null;
     }
 
-    public static function buscarSolicitudesModel($datos){
-        $tabla  = 'solicitudes';
-        $cnx    = conexion::singleton_conexion();
-        $cmdsql = "SELECT
-        s.*,
-        (SELECT a.nombre FROM areas a WHERE a.id = s.id_area) AS area_nom,
-        (SELECT c.nombre FROM curso c WHERE c.id = s.grado) AS nom_curso,
-        (SELECT CONCAT(u.nombre, ' ', u.apellido) FROM usuarios u WHERE u.id_user = s.id_user) AS nom_usuario,
-        (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id ORDER BY c.id DESC LIMIT 1) AS cotizacion,
-        (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id AND c.aprobado = 1 ORDER BY c.id DESC LIMIT 1) AS cotizacion_aprobada
-        FROM solicitudes s WHERE CONCAT(s.justificacion) LIKE '% %'
-        " . $datos['fecha'] . "
-        " . $datos['area'] . "
-        ORDER BY s.id DESC;";
-        try {
-            $preparado = $cnx->preparar($cmdsql);
-            $preparado->bindParam(':id', $datos['id']);
-            $preparado->setFetchMode(PDO::FETCH_ASSOC);
-            if ($preparado->execute()) {
-                return $preparado->fetchAll();
-            } else {
-                return false;
-            }
-        } catch (PDOException $e) {
-            print "Error!: " . $e->getMessage();
-        }
-        $cnx->closed();
-        $cnx = null;
-    }
-
     public static function mostrarSolicitudesUsuarioModel($id)
     {
         $tabla  = 'solicitudes';
@@ -755,6 +725,128 @@ class ModeloSolicitud extends conexion
         ORDER BY c.fecha DESC;";
         try {
             $preparado = $cnx->preparar($cmdsql);
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function buscarSolicitudesCotizacionModel($datos)
+    {
+        $cnx = conexion::singleton_conexion();
+
+        $where  = array();
+        $params = array();
+
+        if (!empty($datos['buscar'])) {
+            $where[] = "s.justificacion LIKE :buscar";
+            $params[':buscar'] = '%' . $datos['buscar'] . '%';
+        }
+
+        if (!empty($datos['fecha'])) {
+            $where[] = "s.fecha_solicitud = :fecha";
+            $params[':fecha'] = $datos['fecha'];
+        }
+
+        if (!empty($datos['area'])) {
+            $where[] = "s.id_area = :area";
+            $params[':area'] = $datos['area'];
+        }
+
+        if (!empty($datos['usuario'])) {
+            $where[] = "s.id_user = :usuario";
+            $params[':usuario'] = $datos['usuario'];
+        }
+
+        $whereSql = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $cmdsql = "SELECT
+        s.*,
+        (SELECT a.nombre FROM areas a WHERE a.id = s.id_area) AS area_nom,
+        (SELECT c.nombre FROM curso c WHERE c.id = s.grado) AS nom_curso,
+        (SELECT CONCAT(u.nombre, ' ', u.apellido) FROM usuarios u WHERE u.id_user = s.id_user) AS nom_usuario,
+        (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id ORDER BY c.id DESC LIMIT 1) AS cotizacion,
+        (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id AND c.aprobado = 1 ORDER BY c.id DESC LIMIT 1) AS cotizacion_aprobada
+        FROM solicitudes s
+        $whereSql
+        ORDER BY s.id DESC;";
+
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            foreach ($params as $key => $value) {
+                $preparado->bindValue($key, $value);
+            }
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function buscarSolicitudesModel($datos)
+    {
+        $cnx = conexion::singleton_conexion();
+
+        $where  = array();
+        $params = array();
+
+        if (!empty($datos['buscar'])) {
+            $where[] = "s.justificacion LIKE :buscar";
+            $params[':buscar'] = '%' . $datos['buscar'] . '%';
+        }
+
+        if (!empty($datos['fecha'])) {
+            $where[] = "s.fecha_solicitud = :fecha";
+            $params[':fecha'] = $datos['fecha'];
+        }
+
+        if (!empty($datos['area'])) {
+            $where[] = "s.id_area = :area";
+            $params[':area'] = $datos['area'];
+        }
+
+        if (!empty($datos['usuario'])) {
+            $where[] = "s.id_user = :usuario";
+            $params[':usuario'] = $datos['usuario'];
+        }
+
+        if (!empty($datos['nivel'])) {
+            $where[] = "u.id_nivel = :nivel";
+            $params[':nivel'] = $datos['nivel'];
+        }
+
+        $whereSql = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $cmdsql = "SELECT
+        s.*,
+        (SELECT a.nombre FROM areas a WHERE a.id = s.id_area) AS area_nom,
+        (SELECT c.nombre FROM curso c WHERE c.id = s.grado) AS nom_curso,
+        (SELECT CONCAT(u.nombre, ' ', u.apellido) FROM usuarios u WHERE u.id_user = s.id_user) AS nom_usuario,
+        (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id ORDER BY c.id DESC LIMIT 1) AS cotizacion,
+        (SELECT COUNT(c.id) FROM cotizacion c WHERE c.id_solicitud = s.id AND c.aprobado = 1 ORDER BY c.id DESC LIMIT 1) AS cotizacion_aprobada
+        FROM solicitudes s
+        JOIN usuarios u ON u.id_user = s.id_user
+        $whereSql
+        ORDER BY s.id DESC;";
+
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            foreach ($params as $key => $value) {
+                $preparado->bindValue($key, $value);
+            }
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
             if ($preparado->execute()) {
                 return $preparado->fetchAll();
