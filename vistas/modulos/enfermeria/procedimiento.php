@@ -74,23 +74,73 @@ if (!$permisos) {
                                 <tr class="text-center font-weight-bold">
                                     <th scope="col">No. Procedimiento</th>
                                     <th scope="col">Nombre</th>
+                                    <th scope="col">Atencion Rapida</th>
+                                    <th scope="col">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody class="buscar">
                                 <?php
                                 foreach ($datos_categoria as $categoria) {
-                                    $id_categoria  = $categoria['id'];
-                                    $nom_categoria = $categoria['nombre'];
+                                    $id_categoria    = $categoria['id'];
+                                    $nom_categoria   = $categoria['nombre'];
+                                    $atencion_rapida = $categoria['atencion_rapida'];
                                     ?>
                                     <tr class="text-center text-uppercase">
                                         <td><?=$id_categoria?></td>
                                         <td><?=$nom_categoria?></td>
+                                        <td><?=nl2br(htmlspecialchars($atencion_rapida))?></td>
                                         <td>
-                                            <button class="btn btn-danger btn-sm" data-tooltip="tooltip" title="Eliminar Procedimiento">
-                                                <i class="fa fa-times"></i>
-                                            </button>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-primary btn-sm" data-tooltip="tooltip" data-placement="bottom" title="Editar Procedimiento" data-toggle="modal" data-target="#editar_categoria<?=$id_categoria?>">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-danger btn-sm" data-tooltip="tooltip" title="Eliminar Procedimiento">
+                                                    <i class="fa fa-times"></i>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
+
+                                    <!-- Editar Categoria -->
+                                    <div class="modal fade" id="editar_categoria<?=$id_categoria?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title font-weight-bold text-primary" id="exampleModalLabel">Editar Procedimiento</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form method="POST">
+                                                        <input type="hidden" name="id_categoria" value="<?=$id_categoria?>">
+                                                        <div class="row p-2">
+                                                            <div class="col-lg-12 form-group">
+                                                                <label class="font-weight-bold">Nombre Categoria <span class="text-danger">*</span></label>
+                                                                <input type="text" name="nom_categoria" class="form-control" value="<?=htmlspecialchars($nom_categoria)?>" required>
+                                                            </div>
+                                                            <div class="col-lg-12 form-group">
+                                                                <label class="font-weight-bold">Atencion Rapida</label>
+                                                                <textarea name="atencion_rapida" class="form-control" rows="4" placeholder="Atencion predeterminada para esta categoria..."><?=htmlspecialchars($atencion_rapida)?></textarea>
+                                                            </div>
+                                                            <div class="col-lg-12 form-group text-right mt-2">
+                                                                <button class="btn btn-danger btn-sm" type="button" data-dismiss="modal">
+                                                                    <i class="fa fa-times"></i>
+                                                                    &nbsp;
+                                                                    Cancelar
+                                                                </button>
+                                                                <button class="btn btn-primary btn-sm" type="submit">
+                                                                    <i class="fa fa-save"></i>
+                                                                    &nbsp;
+                                                                    Guardar
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
                         <?php }?>
                     </tbody>
@@ -105,7 +155,11 @@ if (!$permisos) {
 include_once VISTA_PATH . 'script_and_final.php';
 include_once VISTA_PATH . 'modulos' . DS . 'enfermeria' . DS . 'agregarCategoria.php';
 
-if (isset($_POST['nom_categoria'])) {
+if (isset($_POST['nom_categoria']) && !isset($_POST['id_categoria'])) {
     $instancia->registrarCategoriaControl();
+}
+
+if (isset($_POST['id_categoria'])) {
+    $instancia->editarCategoriaControl();
 }
 ?>

@@ -6,19 +6,24 @@ class ModeloPerfil extends conexion
 
     public static function mostrarDatosPerfilModel($id)
     {
-        $tabla  = 'usuarios';
-        $cnx    = conexion::singleton_conexion();
+        $tabla = 'usuarios';
+        $cnx = conexion::singleton_conexion();
         $cmdsql = "SELECT SQL_NO_CACHE u.*,
-        (SELECT n.nombre FROM nivel n WHERE n.id = u.id_nivel) as nom_nivel,
-        (SELECT nombre from perfiles where id_perfil = u.perfil) as nom_perfil,
-        (SELECT c.nombre FROM curso c WHERE c.id = u.id_curso) as nom_curso,
-        (select nombre_foto from foto_perfil f where f.id_user = u.id_user and f.activo = 1) as imagen
-        FROM " . $tabla . " u where u.id_user = :i";
+        (SELECT n.nombre FROM nivel n WHERE n.id = u.id_nivel) AS nom_nivel,
+        (SELECT nombre FROM perfiles WHERE id_perfil = u.perfil) AS nom_perfil,
+        (SELECT c.nombre FROM curso c WHERE c.id = u.id_curso) AS nom_curso,
+        (SELECT nombre_foto FROM foto_perfil f WHERE f.id_user = u.id_user AND f.activo = 1) AS imagen,
+        c.nombre AS curso_actual,
+        (SELECT actividad FROM extra e WHERE e.id = ei.id_extra) AS activid
+        FROM usuarios u
+        LEFT JOIN curso c ON c.id = u.id_curso
+        LEFT JOIN extra_inscripcion ei ON ei.id_user = u.id_user
+        WHERE u.id_user = :id;";
         try {
             $preparado = $cnx->preparar($cmdsql);
-            $preparado->bindValue(':i', $id, PDO::PARAM_INT);
+            $preparado->bindValue(':id', $id, PDO::PARAM_INT);
             if ($preparado->execute()) {
-                if ($preparado->rowCount() == 1) {
+                if ($preparado->execute()) {
                     return $preparado->fetch();
                 } else {
                     return false;
@@ -35,8 +40,8 @@ class ModeloPerfil extends conexion
 
     public static function mostrarInformacionPerfilModel($id)
     {
-        $tabla  = 'usuarios';
-        $cnx    = conexion::singleton_conexion();
+        $tabla = 'usuarios';
+        $cnx = conexion::singleton_conexion();
         $cmdsql = "SELECT SQL_NO_CACHE u.*,
         (SELECT n.nombre FROM nivel n WHERE n.id = u.id_nivel) as nom_nivel,
         (SELECT nombre from perfiles where id_perfil = u.perfil) as nom_perfil,
@@ -58,12 +63,12 @@ class ModeloPerfil extends conexion
 
     public static function mostrarPerfilesModel()
     {
-        $tabla  = 'perfiles';
-        $cnx    = conexion::singleton_conexion();
+        $tabla = 'perfiles';
+        $cnx = conexion::singleton_conexion();
         $cmdsql = "SELECT SQL_NO_CACHE
         p.*,
-        (SELECT COUNT(m.id) FROM cron_permisos m WHERE m.id_perfil = p.`id_perfil` AND m.activo = 1) AS cant_modulos
-        FROM perfiles p WHERE estado = 'activo' and id_perfil not in(1,17,6) ORDER BY id_perfil ASC;";
+        (SELECT COUNT(m.id) FROM cron_permisos m WHERE m.id_perfil = p.id_perfil AND m.activo = 1) AS cant_modulos
+        FROM perfiles p WHERE estado = 'activo' and id_perfil not in(1,17) ORDER BY id_perfil ASC;";
         try {
             $preparado = $cnx->preparar($cmdsql);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
@@ -79,11 +84,10 @@ class ModeloPerfil extends conexion
         $cnx = null;
     }
 
-
     public static function mostrarPerfilesTodosModel()
     {
-        $tabla  = 'perfiles';
-        $cnx    = conexion::singleton_conexion();
+        $tabla = 'perfiles';
+        $cnx = conexion::singleton_conexion();
         $cmdsql = "SELECT SQL_NO_CACHE
         p.*,
         (SELECT COUNT(m.id) FROM cron_permisos m WHERE m.id_perfil = p.id_perfil AND m.activo = 1) AS cant_modulos
@@ -105,8 +109,8 @@ class ModeloPerfil extends conexion
 
     public static function mostrarDatosSuperEmpresaModel($super_empresa, $tipo_img)
     {
-        $tabla  = 'super_empresa';
-        $cnx    = conexion::singleton_conexion();
+        $tabla = 'super_empresa';
+        $cnx = conexion::singleton_conexion();
         $cmdsql = "SELECT SQL_NO_CACHE s.*,
         (SELECT i.nombre FROM img_super_empresa i WHERE i.id_super_empresa = s.id AND i.tipo_img IN('$tipo_img')) AS imagen
         FROM " . $tabla . " s WHERE s.id = :id";
@@ -128,8 +132,8 @@ class ModeloPerfil extends conexion
 
     public static function guardarPerfilModelo($datos)
     {
-        $tabla  = 'perfiles';
-        $cnx    = conexion::singleton_conexion();
+        $tabla = 'perfiles';
+        $cnx = conexion::singleton_conexion();
         $cmdsql = "INSERT INTO " . $tabla . " (nombre,user_log,id_super_empresa,fechareg) VALUES (:n,:ul,:is,:fr)";
         try {
             $preparado = $cnx->preparar($cmdsql);
@@ -153,14 +157,14 @@ class ModeloPerfil extends conexion
     public static function editarPerfilesModel($datos)
     {
         $tabla = 'perfiles';
-        $cnx   = conexion::singleton_conexion();
-        $sql   = "UPDATE " . $tabla . " SET nombre = :n WHERE id_perfil = :id";
+        $cnx = conexion::singleton_conexion();
+        $sql = "UPDATE " . $tabla . " SET nombre = :n WHERE id_perfil = :id";
         try {
             $preparado = $cnx->preparar($sql);
             $preparado->bindParam(':n', $datos['nombre']);
             $preparado->bindValue(':id', $datos['id_perfil']);
             if ($preparado->execute()) {
-                $id        = $cnx->ultimoIngreso($tabla);
+                $id = $cnx->ultimoIngreso($tabla);
                 $resultado = array('guardar' => true, 'id' => $id);
                 return $resultado;
             } else {
@@ -176,8 +180,8 @@ class ModeloPerfil extends conexion
     public static function editarPerfilModel($datos)
     {
         $tabla = 'usuarios';
-        $cnx   = conexion::singleton_conexion();
-        $sql   = "UPDATE " . $tabla . " SET nombre= :n,apellido= :a,telefono= :t,documento= :d,pass= :p,perfil= :r, id_nivel = :nv WHERE id_user = :id";
+        $cnx = conexion::singleton_conexion();
+        $sql = "UPDATE " . $tabla . " SET nombre= :n,apellido= :a,telefono= :t,documento= :d,pass= :p,perfil= :r, id_nivel = :nv WHERE id_user = :id";
         try {
             $preparado = $cnx->preparar($sql);
             $preparado->bindParam(':n', $datos['nombre']);
@@ -189,7 +193,7 @@ class ModeloPerfil extends conexion
             $preparado->bindParam(':nv', $datos['nivel']);
             $preparado->bindValue(':id', $datos['id_user']);
             if ($preparado->execute()) {
-                $id        = $cnx->ultimoIngreso($tabla);
+                $id = $cnx->ultimoIngreso($tabla);
                 $resultado = array('guardar' => true, 'id' => $id);
                 return $resultado;
             } else {
@@ -202,10 +206,29 @@ class ModeloPerfil extends conexion
         $cnx = null;
     }
 
+    public static function editarNumeroTelefonicoModel($datos)
+    {
+        $tabla = "usuarios";
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "UPDATE $tabla SET telefono = :telefono WHERE id_user = :id_user;";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':telefono', $datos['telefono']);
+            $preparado->bindParam(':id_user', $datos['id_user']);
+            if ($preparado->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+    }
+
     public static function eliminarPerfilModelo($id)
     {
-        $tabla  = 'perfiles';
-        $cnx    = conexion::singleton_conexion();
+        $tabla = 'perfiles';
+        $cnx = conexion::singleton_conexion();
         $cmdsql = "DELETE FROM " . $tabla . " WHERE id_perfil = :id";
         try {
             $preparado = $cnx->preparar($cmdsql);
@@ -225,8 +248,8 @@ class ModeloPerfil extends conexion
 
     public static function guardarFotoModel($datos)
     {
-        $tabla  = 'foto_perfil';
-        $cnx    = conexion::singleton_conexion();
+        $tabla = 'foto_perfil';
+        $cnx = conexion::singleton_conexion();
         $cmdsql = "UPDATE " . $tabla . " SET activo = 0 WHERE id_user = :id;
         INSERT INTO " . $tabla . " (nombre_foto, id_user) VALUES (:n,:id)";
         try {
@@ -248,8 +271,8 @@ class ModeloPerfil extends conexion
 
     public static function mostrarNivelesModel($super_empresa)
     {
-        $tabla  = 'nivel';
-        $cnx    = conexion::singleton_conexion();
+        $tabla = 'nivel';
+        $cnx = conexion::singleton_conexion();
         $cmdsql = "SELECT SQL_NO_CACHE * FROM " . $tabla . " WHERE id_super_empresa = :ids";
         try {
             $preparado = $cnx->preparar($cmdsql);
@@ -262,6 +285,370 @@ class ModeloPerfil extends conexion
             }
         } catch (PDOException $e) {
             print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function mostrarTiposDocumentosModel()
+    {
+        $tabla = 'tipo_doc';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "SELECT * FROM $tabla WHERE activo = 1 ORDER BY id ASC";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function agregarInformacionAdicionalModel($datos)
+    {
+        $tabla = 'info_adicional_usuarios';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "INSERT INTO 
+                $tabla (id_user,tipo_documento, fecha_expedicion, fecha_nacimiento, departamento_nacimiento, direccion_vivienda, genero, estrato) 
+                VALUES (:id_user, :tipo_doc, :fecha_expedicion, :fecha_nacimiento, :departamento_nacimiento, :direccion, :genero, :estrato)";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':id_user', $datos['id_user']);
+            $preparado->bindParam(':tipo_doc', $datos['tipo_doc']);
+            $preparado->bindParam(':fecha_expedicion', $datos['fecha_expedicion']);
+            $preparado->bindParam(':fecha_nacimiento', $datos['fecha_nacimiento']);
+            $preparado->bindParam(':departamento_nacimiento', $datos['departamento_nacimiento']);
+            $preparado->bindParam(':direccion', $datos['direccion']);
+            $preparado->bindParam(':genero', $datos['genero']);
+            $preparado->bindParam(':estrato', $datos['estrato']);
+            if ($preparado->execute()) {
+                $id = $cnx->ultimoIngreso($tabla);
+                $resultado = array('guardar' => true, 'id' => $id);
+                return $resultado;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function borrarInformacionAdicionalAntiguaModel($id_user, $id_info)
+    {
+        $tabla = 'info_adicional_usuarios';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "DELETE FROM $tabla WHERE id_user = :id_user AND id <> :id_info";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindValue(':id_user', $id_user);
+            $preparado->bindValue(':id_info', $id_info);
+            if ($preparado->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function agregarDocumentoIdentidadModel($datos)
+    {
+        $tabla = 'info_adicional_usuarios';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "UPDATE $tabla
+                    SET cedula_doc = :cedula_doc
+                    WHERE id_user = :id_user AND id = :id;";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':cedula_doc', $datos['cedula_doc']);
+            $preparado->bindParam(':id_user', $datos['id_user']);
+            $preparado->bindParam(':id', $datos['id']);
+            if ($preparado->execute()) {
+                $respuesta = array('guardar' => true, 'id' => $datos['id']);
+                return $respuesta;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function mostrarInformacionAdicionalModel($id)
+    {
+        $tabla = 'info_adicional_usuarios';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "SELECT * FROM $tabla iau 
+                    WHERE iau.id_user = :id_user
+                    ORDER BY iau.fecha_reg DESC";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindValue(':id_user', $id);
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            if ($preparado->execute()) {
+                $id = $cnx->ultimoIngreso('experiencia_laboral');
+                $respuesta = array('guardar' => true, 'id' => $id);
+                return $respuesta;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print 'Error!: ' . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function mostrarNivelesAcademicosModel()
+    {
+        $tabla = 'nivel';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "SELECT * FROM $tabla WHERE nombre NOT IN ('Acudiente', 'Operativo');";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function mostrarNivelUsuarioModel($id_user)
+    {
+        $tabla = 'usuarios';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "SELECT u.id_nivel, n.nombre, u.perfil
+                    FROM $tabla u
+                    LEFT JOIN nivel n ON
+                    u.id_nivel = n.id
+                    LEFT JOIN perfiles p ON p.id_perfil = u.perfil
+                    WHERE u.id_nivel <> 0
+                    AND u.id_user = :id_user;";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':id_user', $id_user);
+            if ($preparado->execute()) {
+                return $preparado->fetch();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+    }
+
+    public static function mostrarTodosPerfilesUsuariosModel()
+    {
+        $tabla = 'perfiles';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "SELECT * FROM $tabla WHERE estado = 'activo';";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+    }
+
+    public static function listarTodosLosCursosActivos()
+    {
+        $tabla = 'curso';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "SELECT c.id, c.nombre, c.id_nivel, n.nombre as nivel
+                    FROM $tabla c 
+                    LEFT JOIN nivel n ON n.id = c.id_nivel
+                    WHERE c.activo = 1 AND c.activo IS NOT NULL ORDER BY id ASC";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function guardarArchivoFormacionModel($datos)
+    {
+        $tabla = 'certificado_formacion';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "INSERT INTO $tabla (nombre_archivo, id_formacion, id_user) VALUES (:n, :id, :id_log)";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':n', $datos['nombre']);
+            $preparado->bindParam(':id', $datos['id_formacion']);
+            $preparado->bindParam(':id_log', $datos['id_log']);
+            if ($preparado->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function eliminarArchivoFormacionModel($id)
+    {
+        $tabla = 'certificado_formacion';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "DELETE FROM $tabla 
+                    WHERE id_formacion = :id";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':id', $id);
+            if ($preparado->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function agregarFormacionPerfilModel($datos)
+    {
+        $tabla = 'formacion';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "INSERT INTO $tabla (id_user, programa, institucion, fecha_grado, fecha_expedicion_certi, duracion, tipo_formacion) 
+                    VALUES (:id_user, :programa, :institucion, :fecha_grado, :fecha_expedicion_certi, :duracion, :tipo_formacion)";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':id_user', $datos['id_user']);
+            $preparado->bindParam(':programa', $datos['programa']);
+            $preparado->bindParam(':institucion', $datos['institucion']);
+            $preparado->bindParam(':fecha_grado', $datos['fecha_grado']);
+            $preparado->bindParam(':fecha_expedicion_certi', $datos['fecha_expedicion_certi']);
+            $preparado->bindParam(':duracion', $datos['duracion']);
+            $preparado->bindParam(':tipo_formacion', $datos['tipo_formacion']);
+            if ($preparado->execute()) {
+                $id = $cnx->ultimoIngreso($tabla);
+                $respuesta = array('guardar' => true, 'id' => $id);
+                return $respuesta;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function eliminarFormacionModel($id)
+    {
+        $tabla = 'formacion';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "DELETE FROM $tabla 
+                    WHERE id = :id";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':id', $id);
+            if ($preparado->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function mostrarFormacionesFormalesUsuarioModel($id_user)
+    {
+        $tabla = 'formacion';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = 'SELECT *
+                    FROM formacion 
+                    where id_user = :id_user 
+                    and tipo_formacion = "formal"
+                    ORDER BY fecha_grado ASC;';
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':id_user', $id_user);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function mostrarFormacionesInformalesUsuarioModel($id_user)
+    {
+        $tabla = 'formacion';
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = 'SELECT *
+                    FROM formacion 
+                    where id_user = :id_user 
+                    and tipo_formacion = "informal"
+                    ORDER BY fecha_expedicion_certi DESC;';
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':id_user', $id_user);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function mostrarInformacionCertificadoFormacionModel($id_formacion)
+    {
+        $tabla = "certificado_formacion";
+        $cnx = conexion::singleton_conexion();
+        $cmdsql = "SELECT * FROM $tabla WHERE id_formacion = :id_formacion;";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':id_formacion', $id_formacion);
+            if ($preparado->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print 'Error!: ' . $e->getMessage();
         }
         $cnx->closed();
         $cnx = null;

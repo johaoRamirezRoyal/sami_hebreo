@@ -11,6 +11,7 @@ if (!$_SESSION['rol']) {
 	header('Location:../login?er=' . $error);
 	exit();
 }
+$volver = (isset($_GET['ref']) && $_GET['ref'] == 'listado_updated') ? 'solicitud/listado_updated' : 'solicitud/listado';
 include_once VISTA_PATH . 'cabeza.php';
 include_once VISTA_PATH . 'navegacion.php';
 require_once CONTROL_PATH . 'solicitud' . DS . 'ControlSolicitud.php';
@@ -37,7 +38,7 @@ if (isset($_GET['solicitud'])) {
 				<div class="card shadow-sm mb-4">
 					<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 						<h4 class="m-0 font-weight-bold text-hebreo">
-							<a href="<?=BASE_URL?>solicitud/listado" class="text-decoration-none">
+							<a href="<?=BASE_URL?><?=$volver?>" class="text-decoration-none">
 								<i class="fa fa-arrow-left text-hebreo"></i>
 							</a>
 							&nbsp;

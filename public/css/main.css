@@ -304,6 +304,30 @@
 
 }
 
+.border-left-pink-white {
+    border-left: 0.25rem solid #f06292 !important;
+}
+
+.border-left-semi-orange {
+    border-left: 0.25rem solid #ff5722 !important;
+}
+
+.border-left-green-force {
+    border-left: 0.25rem solid #666633 !important;
+}
+
+.border-left-red {
+    border-left: 0.25rem solid #da3b53 !important;
+}
+
+.border-left-purple-dark {
+    border-left: 0.25rem solid #7d30e2b7 !important;
+}
+
+.border-left-blue-ocean {
+    border-left: 0.25rem solid #3498db !important;
+}
+
 /*----------------------------------- ALERTS------------------------------------ */
 
 
@@ -525,6 +549,22 @@
 .text-hebreo {
 
     color: #0e2a88 !important;
+
+}
+
+.bg-hebreo {
+
+    background-color: #0e2a88 !important;
+
+}
+
+/*------------------------------------------------------------*/
+
+
+
+.table-fixed {
+
+    table-layout: fixed;
 
 }
 

@@ -99,4 +99,42 @@ class ControlAsistencia
         return $rs;
 
     }
+
+    public function buscarUsuarioAsistenciaPersonalControl($id_log)
+    {
+        // Obtenemos el mes y el año actual
+        $mes_actual = date('m');
+        $anio_actual = date('Y');
+
+        // Armamos los datos para enviar al modelo
+        $datos = array(
+            'id_log' => $id_log,
+            'mes' => $mes_actual,
+            'anio' => $anio_actual
+        );
+
+        // Ejecutamos el modelo
+        $mostrar  = ModeloAsistenciaCron::buscarAsistenciaMesActual($datos);
+        return $mostrar;
+    }
+
+    public function buscarUsuarioAsistenciaPersonalFiltroControl($datos)
+    {
+        if(isset($_POST['buscar'])){
+            // Obtenemos el mes y el año filtrado
+            list($anio_actual, $mes_actual) = explode('-', $_POST['fecha']);
+            $id_log = $_POST['id_log'];
+
+            // Armamos los datos para enviar al modelo
+            $datos = array(
+                'id_log' => $id_log,
+                'mes' => $mes_actual,
+                'anio' => $anio_actual
+            );
+
+            // Ejecutamos el modelo
+            $mostrar  = ModeloAsistenciaCron::buscarAsistenciaMesActual($datos);
+            return $mostrar;
+        }
+    }
 }

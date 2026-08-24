@@ -21,19 +21,22 @@ $instancia       = ControlSolicitud::singleton_solicitud();
 $instancia_areas = ControlAreas::singleton_areas();
 $instancia_usuarios = ControlUsuarios::singleton_usuarios();
 
-$datos_solicitud = $instancia->mostrarSolucitudesNivelControl($nivel);
-
-if($perfil_log == 26 || $perfil_log == 1){
-	$datos_solicitud = $instancia->mostrarSolicitudesControl();
+if ($perfil_log == 26 || $perfil_log == 1) {
+	$datos_solicitud = $instancia->mostrarSolicitudesControl(30);
+} else {
+	$datos_solicitud = $instancia->mostrarSolucitudesNivelControl($nivel, 30);
 }
 
-if(isset($_POST['buscar'])){
+if (isset($_POST['filtrar'])) {
 	$datos = array(
-		'buscar' => $_POST['buscar'],
-		'fecha' => $_POST['fecha'],
-		'area' => $_POST['area'],
-		'usuario' => $_POST['usuario'],
+		'buscar'  => (isset($_POST['buscar'])) ? $_POST['buscar'] : '',
+		'fecha'   => (isset($_POST['fecha'])) ? $_POST['fecha'] : '',
+		'area'    => (isset($_POST['area'])) ? $_POST['area'] : '',
+		'usuario' => (isset($_POST['usuario'])) ? $_POST['usuario'] : '',
 	);
+	if ($perfil_log != 26 && $perfil_log != 1) {
+		$datos['nivel'] = $nivel;
+	}
 	$datos_solicitud = $instancia->buscarSolicitudesControl($datos);
 }
 
@@ -49,7 +52,7 @@ if (!$permisos) {
 			<div class="card shadow-sm mb-4">
 				<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
 					<h4 class="m-0 font-weight-bold text-hebreo">
-						<a href="<?=BASE_URL?>compras/index" class="text-decoration-none">
+						<a href="<?=BASE_URL?>solicitud/index" class="text-decoration-none">
 							<i class="fa fa-arrow-left text-hebreo"></i>
 						</a>
 						&nbsp;
@@ -67,61 +70,89 @@ if (!$permisos) {
 					<form method="POST">
 						<div class="row">
 							<div class="col-lg-3 form-group">
+								<label class="font-weight-bold small text-hebreo">Área</label>
 								<select name="area" class="form-control select2" data-tooltip="tooltip" title="Seleccionar area">
-									<option value="">Seleccionar area</option>
+									<option value="">Todas las áreas</option>
 									<?php
 									$datos_areas = $instancia_areas->mostrarAreasControl(1);
 									foreach ($datos_areas as $area) {
+										$selected = (!empty($_POST['area']) && (int)$_POST['area'] == (int)$area['id']) ? 'selected' : '';
 										?>
-										<option value="<?=$area['id']?>"><?=$area['nombre']?></option>
+										<option value="<?=$area['id']?>" <?=$selected?>><?=$area['nombre']?></option>
 										<?php
 									}
 									?>
 								</select>
 							</div>
-							<div class="col-lg-3 form-group">
-								<input type="date" class="form-control" name="fecha" placeholder="Fecha" data-tooltip="tooltip" title="Fecha">
+							<div class="col-lg-2 form-group">
+								<label class="font-weight-bold small text-hebreo">Fecha</label>
+								<input type="date" class="form-control" name="fecha" value="<?=(isset($_POST['fecha'])) ? $_POST['fecha'] : ''?>" data-tooltip="tooltip" title="Fecha">
 							</div>
 							<div class="col-lg-3 form-group">
-								<select name="usuario" id="" class="form-control select2" data-tooltip="tooltip" title="Seleccionar usuario">
-									<option value="">Seleccionar usuario</option>
+								<label class="font-weight-bold small text-hebreo">Solicitante</label>
+								<select name="usuario" class="form-control select2" data-tooltip="tooltip" title="Seleccionar usuario">
+									<option value="">Todos los solicitantes</option>
 									<?php
-									$datos_usuarios = $instancia_usuarios->mostrarTodosUsuariosControl(1);
+									$datos_usuarios = $instancia_usuarios->mostrarTodosUsuariosControl(($perfil_log == 22) ? $nivel : null);
 									foreach ($datos_usuarios as $usuario) {
+										$selected = (!empty($_POST['usuario']) && (int)$_POST['usuario'] == (int)$usuario['id_user']) ? 'selected' : '';
 										?>
-										<option value="<?=$usuario['id']?>"><?=$usuario['nombre']?></option>
+										<option value="<?=$usuario['id_user']?>" <?=$selected?>><?=$usuario['nom_user']?></option>
 										<?php
 									}
 									?>
 								</select>
 							</div>
-							<div class="col-lg-3 form-group mt-auto">
-								<button class="btn btn-hebreo btn-md" type="submit" name="buscar" value="buscar">
-									<i class="fa fa-search"></i>
-									&nbsp;
-									Buscar
-								</button>
+							<div class="col-lg-3 form-group">
+								<label class="font-weight-bold small text-hebreo">Buscar</label>
+								<div class="input-group">
+									<input type="text" class="form-control filtro" placeholder="Buscar" name="buscar" value="<?=(isset($_POST['buscar'])) ? $_POST['buscar'] : ''?>" data-tooltip="tooltip" data-trigger="focus" data-placement="top" title="Presione ENTER para buscar">
+									<div class="input-group-append">
+										<button class="btn btn-hebreo btn-sm" type="submit">
+											<i class="fa fa-search"></i>
+											&nbsp;
+											Buscar
+										</button>
+									</div>
+								</div>
+							</div>
+							<div class="col-lg-1 form-group d-flex align-items-end">
+								<input type="hidden" name="filtrar" value="1">
+								<a href="<?=BASE_URL?>solicitud/listado" class="btn btn-outline-secondary btn-sm" data-tooltip="tooltip" title="Limpiar filtros" data-placement="top">
+									<i class="fa fa-eraser"></i>
+								</a>
 							</div>
 						</div>
 					</form>
 					
-					<div class="table-responsive mt-2">
-						<table class="table table-hover border table-sm" width="100%" cellspacing="0">
-							<thead>
+					<div class="mt-3 border rounded">
+						<table class="table table-hover table-striped table-sm mb-0 table-fixed" width="100%" cellspacing="0">
+							<thead class="bg-hebreo text-white">
 								<tr class="text-center font-weight-bold">
-									<th scope="col">No.</th>
-									<th scope="col">Area</th>
-									<th scope="col">Grado</th>
-									<th scope="col">Solicitante</th>
-									<th scope="col">Justificacion</th>
-									<th scope="col">Fecha Solicitud</th>
-									<th scope="col">Fecha aprobado / rechazado</th>
-									<th scope="col">Coordinador</th>
-									<th scope="col">Area de compras</th>
+									<th scope="col" class="align-middle" style="width: 5%;">No.</th>
+									<th scope="col" class="align-middle" style="width: 9%;">Area</th>
+									<th scope="col" class="align-middle" style="width: 8%;">Grado</th>
+									<th scope="col" class="align-middle" style="width: 11%;">Solicitante</th>
+									<th scope="col" class="align-middle" style="width: 18%;">Justificacion</th>
+									<th scope="col" class="align-middle" style="width: 9%;">Fecha Solicitud</th>
+									<th scope="col" class="align-middle" style="width: 11%;">Fecha aprobado / rechazado</th>
+									<th scope="col" class="align-middle" style="width: 8%;">Coordinador</th>
+									<th scope="col" class="align-middle" style="width: 9%;">Area de compras</th>
+									<th scope="col" class="align-middle" style="width: 12%;">Acciones</th>
 								</tr>
 							</thead>
 							<tbody class="buscar">
 								<?php
+								if (empty($datos_solicitud)) {
+									?>
+									<tr class="text-center">
+										<td colspan="10" class="py-4 text-muted">
+											<i class="fa fa-inbox fa-2x mb-2 d-block"></i>
+											No hay solicitudes registradas
+										</td>
+									</tr>
+									<?php
+								}
 								foreach ($datos_solicitud as $solicitud) {
 									$id_solicitud  = $solicitud['id'];
 									$id_area       = $solicitud['id_area'];
@@ -148,11 +179,11 @@ if (!$permisos) {
 
 									
 									/*------------------*/
-									$span_compras = (empty($solicitud['id_area_compras'])) ? '<span class="badge badge-secondary">Pendiente</span>' : '<span class="badge badge-success">Aprobada</span>';
+									$span_compras = (empty($solicitud['id_area_compras'])) ? '<span class="badge badge-secondary"><i class="fa fa-clock"></i>&nbsp;Pendiente</span>' : '<span class="badge badge-success"><i class="fa fa-check"></i>&nbsp;Aprobada</span>';
 									/*------------------*/
-									$span         = ($estado == 0) ? '<span class="badge badge-warning">Pendiente</span>' : '';
-									$span         = ($estado == 1) ? '<span class="badge badge-success">Aprobada</span>' : $span;
-									$span         = ($estado == 2) ? '<span class="badge badge-danger">Rechazada</span>' : $span;
+									$span         = ($estado == 0) ? '<span class="badge badge-warning"><i class="fa fa-clock"></i>&nbsp;Pendiente</span>' : '';
+									$span         = ($estado == 1) ? '<span class="badge badge-success"><i class="fa fa-check"></i>&nbsp;Aprobada</span>' : $span;
+									$span         = ($estado == 2) ? '<span class="badge badge-danger"><i class="fa fa-times"></i>&nbsp;Rechazada</span>' : $span;
 									$ver_detalles = ($estado == 1 || $estado == 2) ? '' : 'd-none';
 
 									$ver_carta = (empty($solicitud['id_area_compras'])) ? 'd-none' : '';
@@ -162,31 +193,31 @@ if (!$permisos) {
 									if ($activo == 1) {
 										switch($estadocompra){
 											case 0:
-												$estado_compra_badge = '<span class="badge badge-warning">Pendiente</span>';
+												$estado_compra_badge = '<span class="badge badge-warning"><i class="fa fa-clock"></i>&nbsp;Pendiente</span>';
 												break;
 											case 2:
-												$estado_compra_badge = '<span class="badge badge-danger">Rechazada</span>';
+												$estado_compra_badge = '<span class="badge badge-danger"><i class="fa fa-times"></i>&nbsp;Rechazada</span>';
 												break;
 											case 3:
-												$estado_compra_badge = '<span class="badge badge-success">Aprobada</span>';
+												$estado_compra_badge = '<span class="badge badge-success"><i class="fa fa-check"></i>&nbsp;Aprobada</span>';
 												break;
 											default:
 												$estado_compra_badge = '<span class="badge badge-secondary">Default</span>';
 												break;
 											}
 										?>
-										<tr class="text-center">
-											<td><?=$id_solicitud?></td>
-											<td><?=$nom_area?></td>
-											<td><?=$grado?></td>
-											<td><?=$nom_user?></td>
-											<td><?=$texto?></td>
-											<td><?=date('Y-m-d', strtotime($fecharegistro))?></td>
-											<td><?=date('Y-m-d', strtotime($fechareg))?></td>
-											<td><?=$span?></td>
-											<td><?=$estado_compra_badge?></td>
-											<td>
-												<div class="btn-group" role="group">
+									<tr class="text-center">
+										<td class="align-middle font-weight-bold text-hebreo">#<?=$id_solicitud?></td>
+										<td class="align-middle"><?=$nom_area?></td>
+										<td class="align-middle"><?=$grado?></td>
+										<td class="align-middle"><?=$nom_user?></td>
+										<td class="align-middle text-justify text-break"><?=$texto?></td>
+										<td class="align-middle"><?=date('Y-m-d', strtotime($fecharegistro))?></td>
+										<td class="align-middle"><?=date('Y-m-d', strtotime($fechareg))?></td>
+										<td class="align-middle"><?=$span?></td>
+										<td class="align-middle"><?=$estado_compra_badge?></td>
+										<td class="align-middle">
+											<div class="btn-group" role="group">
 													<?php
 													$permisos = $instancia_permiso->permisosUsuarioControl(68, $perfil_log);
 													if ($permisos) {
@@ -202,7 +233,7 @@ if (!$permisos) {
 													$permisos = $instancia_permiso->permisosUsuarioControl(69, $perfil_log);
 													if ($permisos) {
 														?>
-														<a href="<?=BASE_URL?>solicitud/revision?solicitud=<?=base64_encode($id_solicitud)?>" class="btn btn-success btn-sm <?=$ver_revision?>" data-tooltip="tooltip" title="Revision de solicitud" data-placement="bottom">
+														<a href="<?=BASE_URL?>solicitud/revision?solicitud=<?=base64_encode($id_solicitud)?>&ref=listado" class="btn btn-success btn-sm <?=$ver_revision?>" data-tooltip="tooltip" title="Revision de solicitud" data-placement="bottom">
 															<i class="fa fa-check"></i>
 														</a>
 													<?php }

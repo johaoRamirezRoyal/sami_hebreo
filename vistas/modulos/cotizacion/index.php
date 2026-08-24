@@ -14,10 +14,24 @@ if (!$_SESSION['rol']) {
 include_once VISTA_PATH . 'cabeza.php';
 include_once VISTA_PATH . 'navegacion.php';
 require_once CONTROL_PATH . 'solicitud' . DS . 'ControlSolicitud.php';
+require_once CONTROL_PATH . 'usuarios' . DS . 'ControlUsuarios.php';
+require_once CONTROL_PATH . 'areas' . DS . 'ControlAreas.php';
 
-$instancia = ControlSolicitud::singleton_solicitud();
+$instancia          = ControlSolicitud::singleton_solicitud();
+$instancia_areas    = ControlAreas::singleton_areas();
+$instancia_usuarios = ControlUsuarios::singleton_usuarios();
 
-$datos_solicitud = $instancia->mostrarSolicitudesControl();
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+	$datos = array(
+		'buscar'  => (isset($_POST['buscar'])) ? $_POST['buscar'] : '',
+		'fecha'   => (isset($_POST['fecha'])) ? $_POST['fecha'] : '',
+		'area'    => (isset($_POST['area'])) ? $_POST['area'] : '',
+		'usuario' => (isset($_POST['usuario'])) ? $_POST['usuario'] : '',
+	);
+	$datos_solicitud = $instancia->buscarSolicitudesCotizacionControl($datos);
+} else {
+	$datos_solicitud = $instancia->mostrarSolicitudesControl();
+}
 
 $permisos = $instancia_permiso->permisosUsuarioControl(59, $perfil_log);
 if (!$permisos) {
@@ -41,14 +55,44 @@ if (!$permisos) {
 				<div class="card-body">
 					<form method="POST">
 						<div class="row">
-							<div class="col-lg-4 form-group">
+							<div class="col-lg-3 form-group">
+								<label class="font-weight-bold small text-hebreo">Fecha</label>
+								<input type="date" name="fecha" class="form-control" value="<?=(isset($_POST['fecha'])) ? $_POST['fecha'] : ''?>" data-tooltip="tooltip" title="Fecha" data-placement="top">
 							</div>
-							<div class="col-lg-4 form-group">
-								<input type="date" name="fecha" class="form-control" data-tooltip="tooltip" title="Fecha" data-placement="top">
+							<div class="col-lg-3 form-group">
+								<label class="font-weight-bold small text-hebreo">Área</label>
+								<select name="area" class="form-control select2" data-tooltip="tooltip" title="Seleccionar area">
+									<option value="">Todas las áreas</option>
+									<?php
+									$datos_areas = $instancia_areas->mostrarAreasControl(1);
+									foreach ($datos_areas as $area) {
+										$selected = (!empty($_POST['area']) && (int)$_POST['area'] == (int)$area['id']) ? 'selected' : '';
+										?>
+										<option value="<?=$area['id']?>" <?=$selected?>><?=$area['nombre']?></option>
+										<?php
+									}
+									?>
+								</select>
 							</div>
-							<div class="col-lg-4 form-group">
+							<div class="col-lg-3 form-group">
+								<label class="font-weight-bold small text-hebreo">Solicitante</label>
+								<select name="usuario" class="form-control select2" data-tooltip="tooltip" title="Seleccionar solicitante">
+									<option value="">Todos los solicitantes</option>
+									<?php
+									$datos_usuarios = $instancia_usuarios->mostrarTodosUsuariosControl(1);
+									foreach ($datos_usuarios as $usuario) {
+										$selected = (!empty($_POST['usuario']) && (int)$_POST['usuario'] == (int)$usuario['id_user']) ? 'selected' : '';
+										?>
+										<option value="<?=$usuario['id_user']?>" <?=$selected?>><?=$usuario['nom_user']?></option>
+										<?php
+									}
+									?>
+								</select>
+							</div>
+							<div class="col-lg-3 form-group">
+								<label class="font-weight-bold small text-hebreo">Buscar</label>
 								<div class="input-group">
-									<input type="text" class="form-control filtro" placeholder="Buscar" aria-describedby="basic-addon2" name="buscar"data-tooltip="tooltip" data-trigger="focus" data-placement="top" title="Presione ENTER para buscar">
+									<input type="text" class="form-control filtro" placeholder="Buscar" aria-describedby="basic-addon2" name="buscar" value="<?=(isset($_POST['buscar'])) ? $_POST['buscar'] : ''?>" data-tooltip="tooltip" data-trigger="focus" data-placement="top" title="Presione ENTER para buscar">
 									<div class="input-group-append">
 										<button class="btn btn-hebreo btn-sm" type="submit">
 											<i class="fa fa-search"></i>
@@ -60,21 +104,32 @@ if (!$permisos) {
 							</div>
 						</div>
 					</form>
-					<div class="table-responsive mt-2">
-						<table class="table table-hover border table-sm" width="100%" cellspacing="0">
-							<thead>
+					<div class="mt-3 border rounded">
+						<table class="table table-hover table-striped table-sm mb-0 table-fixed" width="100%" cellspacing="0">
+							<thead class="bg-hebreo text-white">
 								<tr class="text-center font-weight-bold">
-									<th scope="col">No.</th>
-									<th scope="col">Area</th>
-									<th scope="col">Grado</th>
-									<th scope="col">Solicitante</th>
-									<th scope="col">Justificacion</th>
-									<th scope="col">Fecha aprobado</th>
-									<th scope="col">Cotizacion / Orden de compra</th>
+									<th scope="col" class="align-middle" style="width: 6%;">No.</th>
+									<th scope="col" class="align-middle" style="width: 10%;">Area</th>
+									<th scope="col" class="align-middle" style="width: 10%;">Grado</th>
+									<th scope="col" class="align-middle" style="width: 12%;">Solicitante</th>
+									<th scope="col" class="align-middle">Justificacion</th>
+									<th scope="col" class="align-middle" style="width: 10%;">Fecha aprobado</th>
+									<th scope="col" class="align-middle" style="width: 12%;">Cotizacion / Orden de compra</th>
+									<th scope="col" class="align-middle" style="width: 12%;">Acciones</th>
 								</tr>
 							</thead>
 							<tbody class="buscar">
 								<?php
+								if (empty($datos_solicitud)) {
+									?>
+									<tr class="text-center">
+										<td colspan="8" class="py-4 text-muted">
+											<i class="fa fa-inbox fa-2x mb-2 d-block"></i>
+											No hay cotizaciones registradas
+										</td>
+									</tr>
+									<?php
+								}
 								foreach ($datos_solicitud as $solicitud) {
 									$id_solicitud  = $solicitud['id'];
 									$id_area       = $solicitud['id_area'];
@@ -91,7 +146,7 @@ if (!$permisos) {
 
 									$fechareg = ($estado == 3 || $estado == 4) ? $solicitud['fecha_aplazado'] : $solicitud['fecha_solicitud'];
 
-									$cotizacion_aprobada = ($solicitud['cotizacion'] == 0) ? '<span class="badge badge-secondary">Falta subir</span>' : '<span class="badge badge-success">Subida</span>';
+									$cotizacion_aprobada = ($solicitud['cotizacion'] == 0) ? '<span class="badge badge-secondary"><i class="fa fa-clock"></i>&nbsp;Falta subir</span>' : '<span class="badge badge-success"><i class="fa fa-check"></i>&nbsp;Subida</span>';
 
 									$ver_subir     = ($solicitud['cotizacion'] == 0 && $solicitud['id_area_compras'] != '') ? '' : 'd-none';
 									$ver_detalles  = ($solicitud['cotizacion'] == 0) ? 'd-none' : '';
@@ -101,15 +156,15 @@ if (!$permisos) {
 									$ver_verificar = ($solicitud['id_pedido'] != 0 && $solicitud['id_recibido'] != 0) ? 'd-none' : '';
 									?>
 									<tr class="text-center">
-										<td><?=$id_solicitud?></td>
-										<td><?=$nom_area?></td>
-										<td><?=$grado?></td>
-										<td><?=$nom_user?></td>
-										<td><?=$texto?></td>
-										<td><?=date('Y-m-d', strtotime($fechareg))?></td>
-										<td><?=$cotizacion_aprobada?></td>
-										<td>
-											<div class="btn-group">
+										<td class="align-middle font-weight-bold text-hebreo">#<?=$id_solicitud?></td>
+										<td class="align-middle"><?=$nom_area?></td>
+										<td class="align-middle"><?=$grado?></td>
+										<td class="align-middle"><?=$nom_user?></td>
+										<td class="align-middle text-justify text-break"><?=$texto?></td>
+										<td class="align-middle"><?=date('Y-m-d', strtotime($fechareg))?></td>
+										<td class="align-middle"><?=$cotizacion_aprobada?></td>
+										<td class="align-middle">
+											<div class="btn-group" role="group">
 <!-- 												<a href="<?=BASE_URL?>cotizacion/verificar?solicitud=<?=base64_encode($id_solicitud)?>" class="btn btn-success btn-sm <?=$ver_verificar?>" data-tooltip="tooltip" title="Verificar entrega" data-placement="bottom">
 													<i class="fa fa-check-double"></i>
 												</a> -->

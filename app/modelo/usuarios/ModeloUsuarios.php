@@ -311,10 +311,11 @@ class ModeloUsuarios extends conexion
         $cnx = null;
     }
 
-    public static function mostrarTodosUsuariosModel()
+    public static function mostrarTodosUsuariosModel($nivel = null)
     {
         $tabla  = 'usuarios';
         $cnx    = conexion::singleton_conexion();
+        $nivel = (!empty($nivel)) ? ' AND u.id_nivel = ' . (int)$nivel : '';
         $cmdsql = "SELECT
         CONCAT(UPPER(u.nombre), ' ', UPPER(u.apellido)) AS nom_user,
         u.*,
@@ -324,7 +325,7 @@ class ModeloUsuarios extends conexion
         FROM usuarios u
         LEFT JOIN nivel n ON n.id = u.id_nivel
         LEFT JOIN curso c ON c.id = u.id_curso
-        WHERE u.perfil NOT IN(1,6,17) AND u.estado = 'activo' ORDER BY u.nombre ASC;";
+        WHERE u.perfil NOT IN(1,6,17) AND u.estado = 'activo'" . $nivel . " ORDER BY u.nombre ASC;";
         try {
             $preparado = $cnx->preparar($cmdsql);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
