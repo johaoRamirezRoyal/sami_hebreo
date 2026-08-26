@@ -217,7 +217,7 @@ class ControlSolicitud
 
                     $datos_usuario = ModeloPerfil::mostrarDatosPerfilModel($_POST['id_log']);
                     $datos_solicitud = ModeloSolicitud::mostrarDatosSolicitudIdModel($guardar['id']);
-                    $datos_coordinador = ModeloPerfil::mostrarDatosCoordinadorModel($datos_solicitud['id_nivel']);
+                    $datos_coordinador = ModeloPerfil::mostrarDatosCoordinadorModel($datos_solicitud['nivel_curso']);
 
                     $curso = (empty($datos_solicitud['curso_nom'])) ? 'N/A' : $datos_solicitud['curso_nom'];
 
