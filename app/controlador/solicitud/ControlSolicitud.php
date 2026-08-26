@@ -217,7 +217,9 @@ class ControlSolicitud
 
                     $datos_usuario = ModeloPerfil::mostrarDatosPerfilModel($_POST['id_log']);
                     $datos_solicitud = ModeloSolicitud::mostrarDatosSolicitudIdModel($guardar['id']);
-                    $datos_coordinador = ModeloPerfil::mostrarDatosCoordinadorModel($datos_solicitud['nivel_curso']);
+
+                    $nivel_solicitud = (!empty($datos_solicitud['nivel_curso'])) ? $datos_solicitud['nivel_curso'] : $datos_usuario['id_nivel'];
+                    $datos_coordinador = ModeloPerfil::mostrarDatosCoordinadorModel($nivel_solicitud);
 
                     $curso = (empty($datos_solicitud['curso_nom'])) ? 'N/A' : $datos_solicitud['curso_nom'];
 
@@ -256,15 +258,6 @@ class ControlSolicitud
                     </div>
                     ';
 
-                    $datos_correo = array(
-                        'asunto' => 'Solicitud de compra No. ' . $guardar['id'],
-                        'correo' => array($datos_coordinador['correo']),
-                        //'correo'  => array('jesuspolo00@gmail.com'),
-                        'user' => 'Administrador',
-                        'mensaje' => $mensaje,
-                        'archivo' => array(''),
-                    );
-
                     $datos_correo_usuario = array(
                         'asunto' => 'Solicitud de compra No. ' . $guardar['id'],
                         'correo' => array($datos_usuario['correo']),
@@ -274,8 +267,24 @@ class ControlSolicitud
                         'archivo' => array(''),
                     );
 
-                    $enviar_correo = Correo::enviarCorreoModel($datos_correo);
                     $enviar_correo_usuario = Correo::enviarCorreoModel($datos_correo_usuario);
+
+                    $enviar_correo = true;
+                    if (!empty($datos_coordinador['correo'])) {
+                        $datos_correo = array(
+                            'asunto' => 'Solicitud de compra No. ' . $guardar['id'],
+                            'correo' => array($datos_coordinador['correo']),
+                            //'correo'  => array('jesuspolo00@gmail.com'),
+                            'user' => 'Administrador',
+                            'mensaje' => $mensaje,
+                            'archivo' => array(''),
+                        );
+
+                        $enviar_correo = Correo::enviarCorreoModel($datos_correo);
+                        
+                    } else {
+                        $enviar_correo = false;
+                    }
 
                     if($enviar_correo == true){
                         echo '
