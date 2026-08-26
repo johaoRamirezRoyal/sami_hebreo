@@ -117,6 +117,20 @@ if (!$permisos) {
                             </div>
                         </div>
                     </form>
+
+                    <div class="col-lg-12 text-left">
+                        <form id="form-hoja-vida">
+                            <div class="col-lg-4 input-group">
+                                <input type="text" class="form-control filtro" placeholder="Buscar" name="buscar_id" id="buscar_id">
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary btn-sm" type="submit">
+                                        <i class="fa fa-search"></i> Hoja de vida
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="table-responsive mt-2">
                         <table class="table table-hover border table-sm" width="100%" cellspacing="0">
                             <thead>
@@ -127,6 +141,7 @@ if (!$permisos) {
                                     <th scope="col">MARCA</th>
                                     <th scope="col">CANTIDAD</th>
                                     <th scope="col">Inspeccionar</th>
+                                    <th scope="col">Editar</th>
                                 </tr>
                             </thead>
                             <tbody class="buscar text-uppercase">
@@ -152,12 +167,18 @@ if (!$permisos) {
                                     //
 
                                 ?>
-                                    <tr class="text-center <?= $ver ?>">
+                                    <tr class="text-center <?= $ver ?>" data-descripcion="<?= $descripcion ?>" data-id-user="<?= $id_user ?>" data-id-area="<?= $id_area ?>" data-cantidad="<?= $cantidad ?>">
                                         <td><?= $usuario ?></td>
                                         <td><?= $area ?></td>
-                                        <td><?= $hoja_vida ?></td>
+                                        <td>
+                                            <span class="span-desc"><?= $hoja_vida ?></span>
+                                            <input type="text" class="form-control form-control-sm inp-desc d-none" value="<?= $hoja_vida ?>">
+                                        </td>
                                         <td><?= $marca ?></td>
-                                        <td><?= $cantidad ?></td>
+                                        <td>
+                                            <span class="span-cant"><?= $cantidad ?></span>
+                                            <input type="number" class="form-control form-control-sm inp-cant d-none" value="<?= $cantidad ?>" min="0">
+                                        </td>
                                         <!-- Boton de span confirmado para mostrar el estado del inventario! -->
                                         <!-- <td><?= $span_confirmado ?></td> -->
                                         <td>
@@ -210,7 +231,7 @@ if (!$permisos) {
                                                                             $precio_modal = $dato['precio'];
                                                                             $cantidad_modal = $dato['cantidad'];
                                                                             $span_confirmado_modal = '<span class="badge badge-success">Asignado</span>';
-                                                                            $reporte_inv = $instancia->obtenerReporteDeInventarioControl($id_inventario_modal);
+                                                                            $reporte_inv = ($instancia->obtenerReporteDeInventarioControl($id_inventario_modal) != null) ? $instancia->obtenerReporteDeInventarioControl($id_inventario_modal) : array('id' => '');
                                                                             $id_reporte_inv = $reporte_inv['id'];
                                                                             if ($dato['estado'] != 1) {
                                                                                 if ($dato['estado'] == 2) {
@@ -336,6 +357,10 @@ if (!$permisos) {
                                                 </a>
                                             </div> -->
                                         </td>
+                                        <td>
+                                            <input type="checkbox" class="chk-edit">
+                                            <button class="btn btn-success btn-sm btn-save-edit d-none">Guardar</button>
+                                        </td>
                                     </tr>
 
                                 <?php } ?>
@@ -347,5 +372,115 @@ if (!$permisos) {
         </div>
     </div>
 </div>
+<script>
+    document.getElementById("form-hoja-vida").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const buscar_id = document.getElementById("buscar_id").value.trim();
+
+        if (buscar_id !== "") {
+            const urlEncoded = btoa(buscar_id);
+            window.location.href = "<?php echo BASE_URL; ?>listado/historial?inventario=" + urlEncoded;
+        } else {
+            ohSnap("Por favor ingrese un ID", {
+                color: "red",
+                "duration": 2000
+            });
+        }
+    });
+
+    document.querySelectorAll('.chk-edit').forEach(function(chk) {
+        chk.addEventListener('change', function() {
+            var tr = this.closest('tr');
+            var spanDesc = tr.querySelector('.span-desc');
+            var inpDesc = tr.querySelector('.inp-desc');
+            var spanCant = tr.querySelector('.span-cant');
+            var inpCant = tr.querySelector('.inp-cant');
+            var btnSave = tr.querySelector('.btn-save-edit');
+
+            if (this.checked) {
+                spanDesc.classList.add('d-none');
+                inpDesc.classList.remove('d-none');
+                spanCant.classList.add('d-none');
+                inpCant.classList.remove('d-none');
+                btnSave.classList.remove('d-none');
+            } else {
+                spanDesc.classList.remove('d-none');
+                inpDesc.classList.add('d-none');
+                spanCant.classList.remove('d-none');
+                inpCant.classList.add('d-none');
+                btnSave.classList.add('d-none');
+                inpDesc.value = spanDesc.textContent.trim();
+                inpCant.value = spanCant.textContent.trim();
+            }
+        });
+    });
+
+    document.querySelectorAll('.btn-save-edit').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var tr = this.closest('tr');
+            var descripcionOriginal = tr.getAttribute('data-descripcion');
+            var idUser = tr.getAttribute('data-id-user');
+            var idArea = tr.getAttribute('data-id-area');
+            var currentCantidad = parseInt(tr.getAttribute('data-cantidad'));
+            var descripcionNueva = tr.querySelector('.inp-desc').value.trim();
+            var newCantidad = parseInt(tr.querySelector('.inp-cant').value);
+
+            if (descripcionNueva === "") {
+                ohSnap("La descripcion no puede estar vacia", { color: "red", duration: 3000 });
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('descripcion_original', descripcionOriginal);
+            formData.append('descripcion_nueva', descripcionNueva);
+            formData.append('id_user', idUser);
+            formData.append('id_area', idArea);
+            formData.append('current_cantidad', currentCantidad);
+            formData.append('new_cantidad', newCantidad);
+
+            fetch('<?= BASE_URL ?>vistas/ajax/inventario/editarListado.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    return response.text().then(function(text) { throw new Error('HTTP ' + response.status + ': ' + text); });
+                }
+                return response.text();
+            })
+            .then(function(text) {
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    throw new Error('Respuesta no es JSON: ' + text);
+                }
+            })
+            .then(function(data) {
+                if (data.success) {
+                    ohSnap(data.msg, { color: "green", duration: 2000 });
+                    if (newCantidad == 0) {
+                        tr.remove();
+                    } else {
+                        tr.setAttribute('data-descripcion', descripcionNueva);
+                        tr.setAttribute('data-cantidad', newCantidad);
+                        tr.querySelector('.span-desc').textContent = descripcionNueva;
+                        tr.querySelector('.span-cant').textContent = newCantidad;
+                        tr.querySelector('.inp-desc').value = descripcionNueva;
+                        tr.querySelector('.inp-cant').value = newCantidad;
+                        tr.querySelector('.chk-edit').checked = false;
+                        tr.querySelector('.chk-edit').dispatchEvent(new Event('change'));
+                    }
+                } else {
+                    ohSnap(data.msg, { color: "red", duration: 3000 });
+                }
+            })
+            .catch(function(err) {
+                console.error(err);
+                ohSnap(err.message || "Error de conexion", { color: "red", duration: 5000 });
+            });
+        });
+    });
+</script>
 <?php
 include_once VISTA_PATH . 'script_and_final.php';

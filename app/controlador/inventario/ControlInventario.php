@@ -4136,4 +4136,72 @@ class ControlInventario
         $mostrar = ModeloInventario::getHistorialMantenimientoFiltradoModel($anio, $categoria);
         return $mostrar;
     }
+
+    public function editarItemsListadoControl()
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['descripcion_original']) && !empty($_POST['descripcion_original'])) {
+                $current_cantidad = intval($_POST['current_cantidad']);
+                $new_cantidad = intval($_POST['new_cantidad']);
+
+                if ($new_cantidad < 0) {
+                    echo json_encode(['success' => false, 'msg' => 'La cantidad no puede ser negativa']);
+                    exit;
+                }
+
+                $diferencia = $new_cantidad - $current_cantidad;
+
+                // Actualizar descripción si cambió
+                if ($_POST['descripcion_original'] != $_POST['descripcion_nueva']) {
+                    $datos_update = array(
+                        'old_descripcion'   => $_POST['descripcion_original'],
+                        'new_descripcion'   => $_POST['descripcion_nueva'],
+                        'id_user'           => $_POST['id_user'],
+                        'id_area'           => $_POST['id_area'],
+                        'cantidad_eliminar' => 0,
+                    );
+                    if (!ModeloInventario::editarItemsListadoModel($datos_update)) {
+                        echo json_encode(['success' => false, 'msg' => 'Error al actualizar la descripción']);
+                        exit;
+                    }
+                }
+
+                $descripcion_buscar = ($_POST['descripcion_original'] != $_POST['descripcion_nueva']) ? $_POST['descripcion_nueva'] : $_POST['descripcion_original'];
+
+                if ($diferencia > 0) {
+                    $datos_clonar = array(
+                        'descripcion' => $descripcion_buscar,
+                        'id_user'     => $_POST['id_user'],
+                        'id_area'     => $_POST['id_area'],
+                        'cantidad'    => $diferencia,
+                    );
+                    $resultado = ModeloInventario::clonarItemsListadoModel($datos_clonar);
+                } elseif ($diferencia < 0) {
+                    $datos_eliminar = array(
+                        'old_descripcion'   => $descripcion_buscar,
+                        'new_descripcion'   => $descripcion_buscar,
+                        'id_user'           => $_POST['id_user'],
+                        'id_area'           => $_POST['id_area'],
+                        'cantidad_eliminar' => abs($diferencia),
+                    );
+                    $resultado = ModeloInventario::editarItemsListadoModel($datos_eliminar);
+                } else {
+                    $resultado = true;
+                }
+
+                if ($resultado) {
+                    echo json_encode(['success' => true, 'msg' => 'Actualizado correctamente']);
+                } else {
+                    echo json_encode(['success' => false, 'msg' => 'Error al actualizar']);
+                }
+            } else {
+                echo json_encode(['success' => false, 'msg' => 'Datos incompletos']);
+            }
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'msg' => 'Excepción: ' . $e->getMessage()]);
+        } catch (Error $e) {
+            echo json_encode(['success' => false, 'msg' => 'Error fatal: ' . $e->getMessage()]);
+        }
+        exit;
+    }
 }

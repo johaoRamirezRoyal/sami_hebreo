@@ -4277,4 +4277,131 @@ ORDER BY iv.id DESC;";
             print "Error al recuperar el historial: " . $e->getMessage();
         }
     }
+
+    public static function editarItemsListadoModel($datos)
+    {
+        $cnx = conexion::singleton_conexion();
+
+        $descripcion_buscar = $datos['old_descripcion'];
+
+        if ($datos['old_descripcion'] != $datos['new_descripcion']) {
+            $cmdsql = "UPDATE inventario SET descripcion = :new_descripcion
+                        WHERE descripcion = :old_descripcion
+                          AND id_user = :id_user
+                          AND id_area = :id_area
+                          AND activo = 1
+                          AND estado NOT IN (4, 5)";
+            try {
+                $preparado = $cnx->preparar($cmdsql);
+                $preparado->bindParam(':new_descripcion', $datos['new_descripcion']);
+                $preparado->bindParam(':old_descripcion', $datos['old_descripcion']);
+                $preparado->bindParam(':id_user', $datos['id_user']);
+                $preparado->bindParam(':id_area', $datos['id_area']);
+                if (!$preparado->execute()) {
+                    return false;
+                }
+                $descripcion_buscar = $datos['new_descripcion'];
+            } catch (PDOException $e) {
+                return false;
+            }
+        }
+
+        if ($datos['cantidad_eliminar'] > 0) {
+            $cmdsql = "SELECT id FROM inventario
+                        WHERE descripcion = :descripcion
+                          AND id_user = :id_user
+                          AND id_area = :id_area
+                          AND activo = 1
+                          AND estado NOT IN (4, 5)
+                        ORDER BY id ASC
+                        LIMIT :limite";
+            try {
+                $preparado = $cnx->preparar($cmdsql);
+                $preparado->bindParam(':descripcion', $descripcion_buscar);
+                $preparado->bindParam(':id_user', $datos['id_user']);
+                $preparado->bindParam(':id_area', $datos['id_area']);
+                $preparado->bindParam(':limite', $datos['cantidad_eliminar'], PDO::PARAM_INT);
+                if ($preparado->execute()) {
+                    $ids = $preparado->fetchAll(PDO::FETCH_COLUMN);
+                    if (!empty($ids)) {
+                        $ids_str = implode(',', $ids);
+                        $cmdsql2 = "UPDATE inventario SET activo = 0 WHERE id IN ($ids_str)";
+                        $preparado2 = $cnx->preparar($cmdsql2);
+                        if (!$preparado2->execute()) {
+                            return false;
+                        }
+                    }
+                } else {
+                    return false;
+                }
+            } catch (PDOException $e) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static function clonarItemsListadoModel($datos)
+    {
+        $cnx = conexion::singleton_conexion();
+
+        $cmdsql = "SELECT descripcion, marca, modelo, precio, estado, activo, fecha_compra, observacion, id_user, id_area, id_categoria, user_log, confirmado, id_super_empresa
+                   FROM inventario
+                   WHERE descripcion = :descripcion
+                     AND id_user = :id_user
+                     AND id_area = :id_area
+                     AND activo = 1
+                     AND estado NOT IN (4, 5)
+                   LIMIT 1";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->bindParam(':descripcion', $datos['descripcion']);
+            $preparado->bindParam(':id_user', $datos['id_user']);
+            $preparado->bindParam(':id_area', $datos['id_area']);
+            if (!$preparado->execute()) {
+                return false;
+            }
+            $plantilla = $preparado->fetch(PDO::FETCH_ASSOC);
+            if (!$plantilla) {
+                return false;
+            }
+        } catch (PDOException $e) {
+            return false;
+        }
+
+        $insertSql = "INSERT HIGH_PRIORITY INTO inventario
+            (descripcion, marca, modelo, precio, estado, activo, fecha_compra, observacion, id_user, id_area, id_categoria, user_log, confirmado, id_super_empresa, codigo, fechareg)
+            VALUES
+            (:descripcion, :marca, :modelo, :precio, :estado, :activo, :fecha_compra, :observacion, :id_user, :id_area, :id_categoria, :user_log, :confirmado, :id_super_empresa, :codigo, NOW())";
+
+        try {
+            for ($i = 0; $i < $datos['cantidad']; $i++) {
+                $codigo = rand();
+                $preparado = $cnx->preparar($insertSql);
+                $preparado->bindParam(':descripcion', $plantilla['descripcion']);
+                $preparado->bindParam(':marca', $plantilla['marca']);
+                $preparado->bindParam(':modelo', $plantilla['modelo']);
+                $preparado->bindParam(':precio', $plantilla['precio']);
+                $preparado->bindParam(':estado', $plantilla['estado']);
+                $preparado->bindParam(':activo', $plantilla['activo']);
+                $preparado->bindParam(':fecha_compra', $plantilla['fecha_compra']);
+                $preparado->bindParam(':observacion', $plantilla['observacion']);
+                $preparado->bindParam(':id_user', $plantilla['id_user']);
+                $preparado->bindParam(':id_area', $plantilla['id_area']);
+                $preparado->bindParam(':id_categoria', $plantilla['id_categoria']);
+                $preparado->bindParam(':user_log', $plantilla['user_log']);
+                $preparado->bindParam(':confirmado', $plantilla['confirmado']);
+                $preparado->bindParam(':id_super_empresa', $plantilla['id_super_empresa']);
+                $preparado->bindParam(':codigo', $codigo);
+                if (!$preparado->execute()) {
+                    return false;
+                }
+            }
+        } catch (PDOException $e) {
+            return false;
+        }
+
+        return true;
+    }
 }

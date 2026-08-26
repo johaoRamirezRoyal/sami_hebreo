@@ -718,8 +718,7 @@ public function cancelarPermiso() {
 
                 $datos_correo = array(
                     'asunto'  => 'Permiso/Licencia',
-                    //'correo'  => array('hernando.ramirez@royalschool.edu.co'),
-                    'correo'  => array('ghumana@colegiohebreounion.edu.co', $correo_asistente, $datos_permiso['correo_user'], $correo_coordinador, 'notificacioneschu@colegiohebreounion.edu.co'),
+                    'correo'  => array('ghumana@colegiohebreounion.edu.co', $correo_asistente, $datos_permiso['correo_user'], $correo_coordinador, 'notificacioneschu@colegiohebreounion.edu.co', "mrecio@colegiohebreounion.edu.co"),
                     'mensaje' => $mensaje,
                     'archivo' => array(''),
                 );
@@ -825,7 +824,7 @@ public function cancelarPermiso() {
                 $datos_correo = array(
                     'asunto'  => 'Permiso/Licencia - ' . $nom_estado,
                     //'correo'  => array('aprendiz.sistemas@royalschool.edu.co'),
-                    'correo'  => array('ghumana@colegiohebreounion.edu.co', 'angel_vargas_contreras@hotmail.com', $datos_permiso['correo_user'], $correo_asistente, $correo_coordinador),
+                    'correo'  => array('ghumana@colegiohebreounion.edu.co', $datos_permiso['correo_user'], $correo_asistente, $correo_coordinador, "mrecio@colegiohebreounion.edu.co"),
                     'mensaje' => $mensaje,
                     'archivo' => array(''), 
                 );
