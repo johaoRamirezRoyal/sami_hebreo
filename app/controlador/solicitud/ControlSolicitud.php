@@ -219,7 +219,12 @@ class ControlSolicitud
                     $datos_solicitud = ModeloSolicitud::mostrarDatosSolicitudIdModel($guardar['id']);
 
                     $nivel_solicitud = (!empty($datos_solicitud['nivel_curso'])) ? $datos_solicitud['nivel_curso'] : $datos_usuario['id_nivel'];
-                    $datos_coordinador = ModeloPerfil::mostrarDatosCoordinadorModel($nivel_solicitud);
+
+                    if ($datos_usuario['perfil'] == 22 || $datos_usuario['perfil'] == 8) {
+                        $datos_coordinador = ModeloPerfil::mostrarDatosComprasModel(24); // 24 perfil de la rectora
+                    } else {
+                        $datos_coordinador = ModeloPerfil::mostrarDatosCoordinadorModel($nivel_solicitud);
+                    }
 
                     $curso = (empty($datos_solicitud['curso_nom'])) ? 'N/A' : $datos_solicitud['curso_nom'];
 

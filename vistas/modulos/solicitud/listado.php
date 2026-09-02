@@ -21,7 +21,7 @@ $instancia       = ControlSolicitud::singleton_solicitud();
 $instancia_areas = ControlAreas::singleton_areas();
 $instancia_usuarios = ControlUsuarios::singleton_usuarios();
 
-if ($perfil_log == 26 || $perfil_log == 1) {
+if ($perfil_log == 26 || $perfil_log == 1 || $perfil_log == 24) {
 	$datos_solicitud = $instancia->mostrarSolicitudesControl(30);
 } else {
 	$datos_solicitud = $instancia->mostrarSolucitudesNivelControl($nivel, 30);
@@ -34,7 +34,7 @@ if (isset($_POST['filtrar'])) {
 		'area'    => (isset($_POST['area'])) ? $_POST['area'] : '',
 		'usuario' => (isset($_POST['usuario'])) ? $_POST['usuario'] : '',
 	);
-	if ($perfil_log != 26 && $perfil_log != 1) {
+	if ($perfil_log != 26 && $perfil_log != 1 && $perfil_log != 24) {
 		$datos['nivel'] = $nivel;
 	}
 	$datos_solicitud = $instancia->buscarSolicitudesControl($datos);
