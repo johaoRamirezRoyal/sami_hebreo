@@ -276,9 +276,13 @@ class ControlSolicitud
 
                     $enviar_correo = true;
                     if (!empty($datos_coordinador['correo'])) {
+                        $correos_destino = array($datos_coordinador['correo']);
+                        if ($datos_usuario['perfil'] == 22) {
+                            $correos_destino[] = 'ghumana@colegiohebreounion.edu.co';
+                        }
                         $datos_correo = array(
                             'asunto' => 'Solicitud de compra No. ' . $guardar['id'],
-                            'correo' => array($datos_coordinador['correo']),
+                            'correo' => $correos_destino,
                             //'correo'  => array('jesuspolo00@gmail.com'),
                             'user' => 'Administrador',
                             'mensaje' => $mensaje,
