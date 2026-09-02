@@ -711,8 +711,11 @@ public function cancelarPermiso() {
                 $informacion_asistente = ModeloRecursos::correoAsistenteDeNivel($datos_permiso['nivel_user']);
                 $correo_asistente = $informacion_asistente['correo'];
 
-                if(($correo_coordinador === null || $correo_coordinador === '') && 
-                    ($datos_permiso['nivel_user'] == 1 || $datos_permiso['nivel_user'] == 6 || $datos['perfil'] == 22)){
+                if ($datos['perfil'] == 22 || $datos['perfil'] == 8) {
+                    $datos_rectora = ModeloPerfil::mostrarDatosComprasModel(24); // 24 perfil de la rectora
+                    $correo_coordinador = (!empty($datos_rectora['correo'])) ? $datos_rectora['correo'] : $correo_coordinador;
+                } elseif (($correo_coordinador === null || $correo_coordinador === '') &&
+                    ($datos_permiso['nivel_user'] == 1 || $datos_permiso['nivel_user'] == 6)) {
                     $correo_coordinador = 'ghumana@colegiohebreounion.edu.co' ;
                 }
 
