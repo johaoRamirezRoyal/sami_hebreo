@@ -89,6 +89,8 @@ class ControlEnfermeria
         $datos_atencion       = ModeloEnfermeria::mostrarDetallesAtencionModel($id);
         $datos_usuario        = ModeloPerfil::mostrarDatosPerfilModel($datos_atencion['id_log']);
         $datos_correos_padres = ModeloEnfermeria::correosPadresModel($datos_atencion['id_user']);
+        $datos_paciente       = ModeloPerfil::mostrarDatosPerfilModel($datos_atencion['id_user']);
+        $datos_coordinador    = ModeloPerfil::mostrarDatosCoordinadorModel($datos_paciente['id_nivel']);
 
         $mensaje = '
         <div style="font-size: 1.2em;">
@@ -109,13 +111,11 @@ class ControlEnfermeria
         Enfermera
         <br>
         <br>
-        Colegio Real - Royal School
+        Colegio Real - Hebreo Union
         <br>
         <br>
-        (+57-5) 359-9494 / 359-9516  EXT:107
         <br>
         <br>
-        <a href="#">enfermeria@royalschool.edu.co</a>
         </b></p>
         </div>
         ';
@@ -126,11 +126,14 @@ class ControlEnfermeria
             $correo[] = $envio_correo_padre['correo'];
         }
 
-        $correo[] = 'registro@royalschool.edu.co';
-        $correo[] = 'enfermeria@royalschool.edu.co';
+        $correo[] = 'ghumana@colegiohebreounion.edu.co';
+
+        if (!empty($datos_coordinador['correo'])) {
+            $correo[] = $datos_coordinador['correo'];
+        }
 
         $datos_correo = array(
-            'asunto'  => 'Atencion Medica - Colegio Real Royal School',
+            'asunto'  => 'Atencion Medica - Colegio Hebreo Unión',
             'correo'  => $correo,
             'mensaje' => $mensaje,
             'archivo' => array(''),
@@ -266,13 +269,11 @@ class ControlEnfermeria
                     Enfermera
                     <br>
                     <br>
-                    Colegio Real - Royal School
+                    Colegio Real - Hebreo Unión
                     <br>
                     <br>
-                    (+57-5) 359-9494 / 359-9516  EXT:107
                     <br>
                     <br>
-                    <a href="#">enfermeria@royalschool.edu.co</a>
                     </b></p>
                     </div>
                     ';
@@ -282,9 +283,6 @@ class ControlEnfermeria
                     foreach ($datos_correos_padres as $envio_correo_padre) {
                         $correo[] = $envio_correo_padre['correo'];
                     }
-
-                    $correo[] = 'registro@royalschool.edu.co';
-                    $correo[] = 'enfermeria@royalschool.edu.co';
                     $correo[] = 'ghumana@colegiohebreounion.edu.co';
 
                     if (!empty($datos_coordinador['correo'])) {
