@@ -244,6 +244,8 @@ class ControlEnfermeria
                     $datos_atencion       = ModeloEnfermeria::mostrarDetallesAtencionModel($guardar['id']);
                     $datos_usuario        = ModeloPerfil::mostrarDatosPerfilModel($_POST['id_log']);
                     $datos_correos_padres = ModeloEnfermeria::correosPadresModel($datos_atencion['id_user']);
+                    $datos_paciente       = ModeloPerfil::mostrarDatosPerfilModel($datos_atencion['id_user']);
+                    $datos_coordinador    = ModeloPerfil::mostrarDatosCoordinadorModel($datos_paciente['id_nivel']);
 
                     $mensaje = '
                     <div style="font-size: 1.2em;">
@@ -283,9 +285,14 @@ class ControlEnfermeria
 
                     $correo[] = 'registro@royalschool.edu.co';
                     $correo[] = 'enfermeria@royalschool.edu.co';
+                    $correo[] = 'ghumana@colegiohebreounion.edu.co';
+
+                    if (!empty($datos_coordinador['correo'])) {
+                        $correo[] = $datos_coordinador['correo'];
+                    }
 
                     $datos_correo = array(
-                        'asunto'  => 'Atencion Medica - Colegio Real Royal School',
+                        'asunto'  => 'Atencion Medica - Colegio Hebreo Unión',
                         'correo'  => $correo,
                         'mensaje' => $mensaje,
                         'archivo' => array(''),

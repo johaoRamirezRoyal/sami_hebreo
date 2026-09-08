@@ -94,7 +94,7 @@ if (isset($_GET['usuario'])) {
                                     <textarea class="form-control" rows="5" name="tratamiento" id="tratamiento_atencion"></textarea>
                                 </div>
                                 <div class="col-lg-12 form-group">
-                                    <label class="font-weight-bold">Envio de correo a padres <span class="text-danger">*</span></label>
+                                    <label class="font-weight-bold">Envio de correo<span class="text-danger">*</span></label>
                                     <div class="form-inline mt-2">
                                         <div class="form-check ml-4">
                                             <input class="form-check-input" type="radio" name="envio" id="envio1" required value="1" />
