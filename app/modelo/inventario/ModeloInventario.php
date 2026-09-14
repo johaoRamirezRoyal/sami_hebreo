@@ -926,12 +926,12 @@ class ModeloInventario extends conexion
             if ($preparado->execute()) {
                 return $preparado->fetchAll();
             } else {
-                return false;
+                return array();
             }
         } catch (PDOException $e) {
             print "Error!: " . $e->getMessage();
         }
-        $cnx = null;
+        return array();
     }
 
     public static function actualizarEstadoInventarioModel($id_inv, $desc_report) {
