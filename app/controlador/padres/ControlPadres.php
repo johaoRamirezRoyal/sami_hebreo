@@ -246,7 +246,7 @@ class ControlPadres
                     $datos_correo = array(
                         'asunto'  => 'Admisiones - Formato clinico',
                         'mensaje' => 'El usuario ' . $_POST['nombre_completo'] . ' ha completado el formato de historia clinica',
-                        'user'    => 'Admisiones colegio real',
+                        'user'    => 'Admisiones colegio Hebreo Unión',
                         //'correo' => 'jesuspolo00@gmail.com'
                         'correo'  => $correo,
                         'archivo' => array(''),

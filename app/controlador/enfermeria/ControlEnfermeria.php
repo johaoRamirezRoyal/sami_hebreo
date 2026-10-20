@@ -111,7 +111,7 @@ class ControlEnfermeria
         Enfermera
         <br>
         <br>
-        Colegio Real - Hebreo Union
+        Colegio Hebreo Union
         <br>
         <br>
         <br>
@@ -269,7 +269,7 @@ class ControlEnfermeria
                     Enfermera
                     <br>
                     <br>
-                    Colegio Real - Hebreo Unión
+                    Colegio Hebreo Unión
                     <br>
                     <br>
                     <br>

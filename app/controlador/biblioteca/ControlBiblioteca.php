@@ -898,7 +898,7 @@ class ControlBiblioteca
             foreach($array_paz_salvo_curso as $usuario){
                 $datos_correo = array(
                 'asunto' => 'Paz y salvo',
-                'mensaje' => '<p>El <span style="font-weight:bold;">Colegio Real Royal School</span> certifica el estado en el que se encuentra el alumnos en relación a paz y salvo por concepto de prestamo de libros.</p>
+                'mensaje' => '<p>El <span style="font-weight:bold;">Colegio Hebreo Union</span> certifica el estado en el que se encuentra el alumnos en relación a paz y salvo por concepto de prestamo de libros.</p>
                 <p>El certificado se encuentra en el siguiente enlace dirigido al pdf:' . BASE_URL . 'imprimir/biblioteca/paz_salvo?usuario=' . base64_encode($usuario['id_user']) . '</p>
                 <p>Si tiene alguna duda, no dude en contactarnos</p>
                 ',

@@ -192,7 +192,7 @@ $redir = (isset($_GET['id'])) ? 'hojaVida?id=' . $_GET['id'] . '&link=1' : 'hoja
                                                     &nbsp;
                                                     <strong>¡Atención!</strong>
                                                     &nbsp;
-                                                    Si cuenta con más de 5 años en el Colegio Real Royal School no es requisito adjuntar experiencia anterior.
+                                                    Si cuenta con más de 5 años en el Colegio Hebreo Unión no es requisito adjuntar experiencia anterior.
                                                 </div>
                                             </div>
                                         </div>

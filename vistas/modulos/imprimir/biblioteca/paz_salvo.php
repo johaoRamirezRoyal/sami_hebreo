@@ -134,7 +134,7 @@ if (isset($_GET['usuario'])) {
 
     $pdf->setData($datos_super_empresa['imagen']);
 
-    $pdf->SetAuthor('Colegio Real');
+    $pdf->SetAuthor('Colegio Hebreo Unión');
 
     $pdf->SetTitle('Paz y salvo');
 
