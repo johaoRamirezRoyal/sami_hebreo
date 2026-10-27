@@ -34,6 +34,7 @@ if (isset($_GET['proveedor'])) {
 	$banco_proveedor        = $instancia->mostrarBancoProveedorControl($id_proveedor);
 	$documentos_proveedor   = $instancia->mostrarDocumentosProveedorControl($id_proveedor);
 	$calificacion_proveedor = $instancia->mostrarCalificacionProveedorControl($id_proveedor);
+	$reevaluaciones_proveedor = $instancia->mostrarReevaluacionesProveedorControl($id_proveedor);
 	?>
 	<div class="container-fluid">
 		<div class="row">
@@ -422,18 +423,7 @@ if (isset($_GET['proveedor'])) {
 												$anio_evaluado   = date('Y', strtotime($calificacion['fecha_evaluacion']));
 												$total           = $calificacion['total'];
 
-												$badge = '';
-
-												if ($total >= 4.5) {
-													$badge = '<span class="badge badge-primary p-2">Muy confiable</span>';
-												} elseif ($total >= 4.0) {
-													$badge = '<span class="badge badge-success p-2">Confiable</span>';
-												} elseif ($total >= 3.6) {
-													$badge = '<span class="badge badge-warning p-2">Aceptable</span>';
-												} else {
-													$badge = '<span class="badge badge-danger p-2">No confiable</span>';
-												}
-
+												$badge = badgeCriterioEvaluacion($total);
 												?>
 												<tr class="text-center text-dark">
 													<td><?=$anio_evaluado?></td>
@@ -441,8 +431,8 @@ if (isset($_GET['proveedor'])) {
 													<td><?=$badge?></td>
 													<td>
 														<div class="btn-group">
-															<a href="<?=BASE_URL?>proveedor/detallesEvaluacion?proveedor=<?=base64_encode($id_proveedor)?>&id_calificacion=<?=base64_encode($id_calificacion)?>" class="btn btn-info btn-sm" data-tooltip="tooltip" title="Ver detalles" data-placement="bottom" data-trigger="hover">
-																<i class="fa fa-eye"></i>
+															<a href="<?=BASE_URL?>imprimir/evaluacionProveedor?id=<?=base64_encode($id_calificacion)?>&tipo=evaluacion" target="_blank" class="btn btn-info btn-sm" data-tooltip="tooltip" title="Ver PDF" data-placement="bottom" data-trigger="hover">
+																<i class="fas fa-file-pdf"></i>
 															</a>
 														</div>
 													</td>
@@ -453,6 +443,45 @@ if (isset($_GET['proveedor'])) {
 										</tbody>
 									</table>
 								</div>
+								<?php if (!empty($reevaluaciones_proveedor)) { ?>
+								<div class="table-responsive">
+									<table class="table table-hover border" width="100%" cellspacing="0">
+										<thead>
+											<tr class="text-center font-weight-bold">
+												<th colspan="5">
+													REEVALUACIONES REALIZADAS
+												</th>
+											</tr>
+											<tr class="text-center font-weight-bold">
+												<th>Fecha</th>
+												<th>Periodo</th>
+												<th>Calificacion total</th>
+												<th>Criterio de confiabilidad</th>
+												<th>Detalles</th>
+											</tr>
+										</thead>
+										<tbody class="buscar text-uppercase">
+											<?php
+											foreach ($reevaluaciones_proveedor as $reevaluacion) {
+												?>
+												<tr class="text-center text-dark">
+													<td><?=$reevaluacion['fecha_evaluacion']?></td>
+													<td><?=$reevaluacion['periodo']?></td>
+													<td><?=$reevaluacion['total']?></td>
+													<td><?=badgeCriterioEvaluacion($reevaluacion['total'])?></td>
+													<td>
+														<a href="<?=BASE_URL?>imprimir/evaluacionProveedor?id=<?=base64_encode($reevaluacion['id'])?>&tipo=reevaluacion" target="_blank" class="btn btn-info btn-sm" data-tooltip="tooltip" title="Ver PDF" data-placement="bottom" data-trigger="hover">
+															<i class="fas fa-file-pdf"></i>
+														</a>
+													</td>
+												</tr>
+												<?php
+											}
+											?>
+										</tbody>
+									</table>
+								</div>
+								<?php } ?>
 							</div>
 
 

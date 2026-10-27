@@ -28,6 +28,10 @@ if (!$permisos) {
 	include_once VISTA_PATH . 'modulos' . DS . '403.php';
 	exit();
 }
+
+// Promedio de las evaluaciones del año actual (escala 1-5)
+$evaluados_anio     = $instancia->mostrarEvaluadosAnioControl();
+$promedio_evaluados = (count($evaluados_anio) > 0) ? array_sum(array_column($evaluados_anio, 'total')) / count($evaluados_anio) : 0;
 ?>
 <div class="container-fluid">
 	<div class="row">
@@ -68,6 +72,29 @@ if (!$permisos) {
 							</div>
 						</div>
 					</form>
+					<div class="row align-items-center mb-3">
+						<div class="col-lg-4">
+							<div class="card shadow-sm border-0 border-left-primary">
+								<div class="card-body d-flex align-items-center">
+									<div class="mr-3">
+										<i class="fas fa-chart-line fa-2x text-hebreo"></i>
+									</div>
+									<div>
+										<h6 class="font-weight-bold mb-1">Evaluación global de proveedores <?=date('Y')?></h6>
+										<h3 class="font-weight-bold text-hebreo mb-0">
+											<?=number_format($promedio_evaluados, 2)?> / 5 (<?=number_format($promedio_evaluados * 20, 1)?>%)
+										</h3>
+										<small class="text-muted">Promedio de <?=count($evaluados_anio)?> evaluaciones</small>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-8 text-right">
+							<a href="<?=BASE_URL?>proveedor/proveedoresEvaluados" class="btn btn-success btn-md">
+								Proveedores evaluados <?=date('Y')?>
+							</a>
+						</div>
+					</div>
 					<div class="table-responsive mt-2">
 						<table class="table table-hover table-sm border" width="100%" cellspacing="0">
 							<thead>
@@ -79,6 +106,8 @@ if (!$permisos) {
 									<th scope="col">Contacto</th>
 									<th scope="col">Telefono contacto</th>
 									<th scope="col">Detalle producto</th>
+									<th scope="col">Evaluación <?=date('Y')?></th>
+									<th scope="col">Acciones</th>
 								</tr>
 							</thead>
 							<tbody class="buscar">
@@ -94,12 +123,26 @@ if (!$permisos) {
 									$fecha_ingreso  = $proveedor['fecha_ingreso'];
 
 									$documentos_proveedor = $instancia->validarDocumentosProveedorControl($id_proveedor);
-									$evaluacion_proveedor = $instancia->validarEvaluacionProveedorControl($id_proveedor);
+									$evaluacion_proveedor = $instancia->validarEvaluacionProveedorControl($id_proveedor) ?: array();
 
 									$ver_documentos = ($documentos_proveedor['contar'] == 3) ? 'd-none' : '';
 
-									$ver_evaluacion      = ($evaluacion_proveedor['id'] == '' && $documentos_proveedor['contar'] >= 3) ? '' : 'd-none';
-									$ver_span_evaluacion = ($evaluacion_proveedor['id'] != '') ? '' : 'd-none';
+									$reevaluacion_proveedor = $instancia->validarReevaluacionProveedorControl($id_proveedor) ?: array();
+
+									$ver_evaluacion = (empty($evaluacion_proveedor) && $documentos_proveedor['contar'] >= 3) ? '' : 'd-none';
+
+									// Como en Royal: se reevalúa si la evaluación del año no llega a "Confiable" (< 4.0)
+									// y no hay reevaluación, o la última tampoco llegó
+									$ver_reevaluacion = (!empty($evaluacion_proveedor) && $evaluacion_proveedor['total'] < 4.0
+										&& (empty($reevaluacion_proveedor) || $reevaluacion_proveedor['total'] < 4.0)) ? '' : 'd-none';
+
+									if (!empty($reevaluacion_proveedor)) {
+										$estado_evaluacion = '<span class="badge badge-info">Reevaluado - ' . round($reevaluacion_proveedor['total'], 2) . '</span>';
+									} elseif (!empty($evaluacion_proveedor)) {
+										$estado_evaluacion = '<span class="badge badge-success">Evaluación realizada - ' . round($evaluacion_proveedor['total'], 2) . '</span>';
+									} else {
+										$estado_evaluacion = '<span class="badge badge-warning">Evaluación pendiente</span>';
+									}
 
 									?>
 									<tr class="text-center text-uppercase text-dark">
@@ -112,9 +155,7 @@ if (!$permisos) {
 										<td><?=$nom_contacto?></td>
 										<td><?=$tel_contacto?></td>
 										<td><?=$detalle?></td>
-										<td class="<?=$ver_span_evaluacion?>">
-											<span class="badge badge-success">Evaluacion realizada</span>
-										</td>
+										<td><?=$estado_evaluacion?></td>
 										<td>
 											<div class="btn-group">
 												<a href="<?=BASE_URL?>proveedor/hojaRegistro?proveedor=<?=base64_encode($id_proveedor)?>" class="btn btn-info btn-sm" data-tooltip="tooltip" title="Ver hoja de registro" data-placement="bottom" data-trigger="hover">
@@ -122,6 +163,9 @@ if (!$permisos) {
 												</a>
 												<a href="<?=BASE_URL?>proveedor/evaluacion?proveedor=<?=base64_encode($id_proveedor)?>" class="btn btn-success btn-sm <?=$ver_evaluacion?>" data-tooltip="tooltip" data-placement="bottom" title="Evaluacion (<?=date('Y')?>)">
 													<i class="fas fa-clipboard-list"></i>
+												</a>
+												<a href="<?=BASE_URL?>proveedor/evaluacion?proveedor=<?=base64_encode($id_proveedor)?>&tipo=reevaluacion" class="btn btn-warning btn-sm <?=$ver_reevaluacion?>" data-tooltip="tooltip" data-placement="bottom" title="Reevaluacion (<?=date('Y')?>)">
+													<i class="fas fa-clipboard-check"></i>
 												</a>
 												<a href="<?=BASE_URL?>proveedor/documentos?proveedor=<?=base64_encode($id_proveedor)?>" class="btn btn-hebreo btn-sm <?=$ver_documentos?>" data-tooltip="tooltip" data-placement="bottom" title="Subir Documentos">
 													<i class="fas fa-upload"></i>

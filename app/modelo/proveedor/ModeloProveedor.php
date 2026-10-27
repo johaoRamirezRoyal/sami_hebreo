@@ -573,6 +573,116 @@ class ModeloProovedor extends conexion
         $cnx = null;
     }
 
+    public static function registrarReevaluacionModel($datos)
+    {
+        $cnx    = conexion::singleton_conexion();
+        $cmdsql = "INSERT INTO proveedor_reevaluacion (id_proveedor, periodo, fecha_evaluacion, evaluador,
+        pregunta_1, pregunta_2, pregunta_3, pregunta_4, pregunta_5,
+        observacion_1, observacion_2, observacion_3, observacion_4, observacion_5,
+        total, id_log, is_revaluado)
+        VALUES (:id_proveedor, :periodo, :fecha_evaluacion, :evaluador,
+        :pregunta_1, :pregunta_2, :pregunta_3, :pregunta_4, :pregunta_5,
+        :observacion_1, :observacion_2, :observacion_3, :observacion_4, :observacion_5,
+        :total, :id_log, 0)";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            return $preparado->execute($datos);
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function validarReevaluacionProveedorModel($id)
+    {
+        $cnx    = conexion::singleton_conexion();
+        $cmdsql = "SELECT SQL_NO_CACHE * FROM proveedor_reevaluacion WHERE id_proveedor = :id AND YEAR(fechareg) = YEAR(NOW()) ORDER BY id DESC LIMIT 1";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            $preparado->bindParam(':id', $id);
+            if ($preparado->execute()) {
+                return $preparado->fetch();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function mostrarReevaluacionesProveedorModel($id)
+    {
+        $cnx    = conexion::singleton_conexion();
+        $cmdsql = "SELECT SQL_NO_CACHE * FROM proveedor_reevaluacion WHERE id_proveedor = :id ORDER BY id DESC";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            $preparado->bindParam(':id', $id);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    public static function mostrarEvaluadosAnioModel()
+    {
+        $cnx    = conexion::singleton_conexion();
+        $cmdsql = "SELECT SQL_NO_CACHE pe.*, pd.nombre, pd.num_identificacion
+        FROM proveedor_evaluacion pe
+        LEFT JOIN proveedor_detalle pd ON pd.id_proveedor = pe.id_proveedor
+        WHERE YEAR(pe.fechareg) = YEAR(NOW())
+        ORDER BY pd.nombre";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            if ($preparado->execute()) {
+                return $preparado->fetchAll();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
+    // $tabla viene del código (proveedor_evaluacion | proveedor_reevaluacion), nunca del usuario
+    public static function mostrarEvaluacionPdfModel($tabla, $id)
+    {
+        $cnx    = conexion::singleton_conexion();
+        $cmdsql = "SELECT SQL_NO_CACHE e.*, pd.nombre AS nom_proveedor, pd.num_identificacion,
+        CONCAT(u.nombre, ' ', u.apellido) AS nom_evaluador
+        FROM " . $tabla . " e
+        LEFT JOIN proveedor_detalle pd ON pd.id_proveedor = e.id_proveedor
+        LEFT JOIN usuarios u ON u.id_user = e.evaluador
+        WHERE e.id = :id";
+        try {
+            $preparado = $cnx->preparar($cmdsql);
+            $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            $preparado->bindParam(':id', $id);
+            if ($preparado->execute()) {
+                return $preparado->fetch();
+            } else {
+                return false;
+            }
+        } catch (PDOException $e) {
+            print "Error!: " . $e->getMessage();
+        }
+        $cnx->closed();
+        $cnx = null;
+    }
+
     public static function eliminarContactoModel($id)
     {
         $tabla  = 'proveedor_contactos';

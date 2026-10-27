@@ -32,6 +32,7 @@ if (!$permisos) {
 if (isset($_GET['proveedor'])) {
 
 	$id_proveedor = base64_decode($_GET['proveedor']);
+	$es_reevaluacion = (isset($_GET['tipo']) && $_GET['tipo'] == 'reevaluacion');
 
 	$datos_proveedor = $instancia->mostrarDatosProveedorIdControl($id_proveedor);
 	?>
@@ -45,7 +46,7 @@ if (isset($_GET['proveedor'])) {
 								<i class="fa fa-arrow-left text-primary"></i>
 							</a>
 							&nbsp;
-							Evaluacion proveedor (<?=$datos_proveedor['nombre'] . ' - ' . $datos_proveedor['num_identificacion']?>)
+							<?=($es_reevaluacion) ? 'Reevaluacion' : 'Evaluacion'?> proveedor (<?=$datos_proveedor['nombre'] . ' - ' . $datos_proveedor['num_identificacion']?>)
 						</h4>
 						<!-- <p class="m-0 font-weight-bold float-right text-danger">Campos obligatorios (<span class="text-danger">*</span>)</p> -->
 					</div>
@@ -54,6 +55,16 @@ if (isset($_GET['proveedor'])) {
 						<input type="hidden" name="id_proveedor" value="<?=$id_proveedor?>">
 						<div class="card-body">
 							<div class="row p-2">
+								<?php if ($es_reevaluacion) { ?>
+								<div class="form-group col-lg-4">
+									<label class="font-weight-bold">Periodo <span class="text-danger">*</span></label>
+									<select class="form-control" name="periodo" required>
+										<option value="" disabled selected>Selecciona una opción</option>
+										<option value="1">Primer periodo</option>
+										<option value="2">Segundo periodo</option>
+									</select>
+								</div>
+								<?php } else { ?>
 								<div class="form-group col-lg-4">
 									<label class="font-weight-bold">Fecha de inicio <span class="text-danger">*</span></label>
 									<input type="date" name="fecha_inicio" class="form-control" required>
@@ -62,6 +73,7 @@ if (isset($_GET['proveedor'])) {
 									<label class="font-weight-bold">Fecha de finalizacion <span class="text-danger">*</span></label>
 									<input type="date" name="fecha_finalizacion" class="form-control" required>
 								</div>
+								<?php } ?>
 								<div class="form-group col-lg-4">
 									<label class="font-weight-bold">Fecha de evaluacion <span class="text-danger">*</span></label>
 									<input type="date" name="fecha_evaluacion" class="form-control" required>
@@ -198,7 +210,11 @@ if (isset($_GET['proveedor'])) {
 	include_once VISTA_PATH . 'script_and_final.php';
 
 	if (isset($_POST['id_log'])) {
-		$instancia->registrarEvaluacionAnualControl();
+		if ($es_reevaluacion) {
+			$instancia->registrarReevaluacionControl();
+		} else {
+			$instancia->registrarEvaluacionAnualControl();
+		}
 	}
 }
 ?>

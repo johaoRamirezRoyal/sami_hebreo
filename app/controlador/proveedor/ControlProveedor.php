@@ -537,64 +537,135 @@ class ControlProveedor
             );
 
             $guardar = ModeloProovedor::registrarEvaluacionAnualModel($datos);
-
-            if ($guardar == true) {
-
-                $mensaje = '
-                <div>
-                <p style="font-size: 1.6em;">
-                El usuario <b>' . $datos['evaluador'] . '</b> ha solucionado el reporte del siguiente articulo:
-                </p>
-                <p>
-                <ul style="font-size: 1.4em;">
-                <li><b>Fecha evaluación:</b> ' . $datos['fecha_evaluacion'] . '</li>
-                <li><b>Pregunta 1:</b> ' . $datos['pregunta_1'] . '</li>
-                <li><b>Pregunta 2:</b> ' . $datos['pregunta_2'] . '</li>
-                <li><b>Pregunta 3:</b> ' . $datos['pregunta_3'] . '</li>
-                <li><b>Pregunta 4:</b> ' . $datos['pregunta_4'] . '</li>
-                <li><b>Pregunta 5:</b> ' . $datos['pregunta_5'] . '</li>
-                <li><b>Total:</b> ' . $datos['total'] . '</li>
-                </ul>
-                </p>
-                </div>
-                ';
-
-                //enviar correo
-                $datos_correo = array(
-                    'asunto'  => 'Solucion de articulo',
-                    'para' => array('jrodriguez@colegiohebreounion.edu.co'),
-                    'correo'  => array('jrodriguez@colegiohebreounion.edu.co', 'sami@colegiohebreounion.edu.co'),
-                    'user'    => 'Administrador',
-                    'mensaje' => $mensaje,
-                    'archivo' => array(''),
-                );
-
-                $enviar_correo = Correo::enviarCorreoModel($datos_correo);
-                
-                if($enviar_correo){
-                    echo '<script>console.log("Correo enviado correctamente.");</script>';
-                }else{
-                    echo '<script>console.log("Error al enviar el correo.");</script>';
-                }
-
-                echo '
-                <script>
-                ohSnap("Guardadocorrectamente!", {color: "green", "duration": "1000"});
-                setTimeout(recargarPagina,1050);
-
-                function recargarPagina(){
-                    window.location.replace("index");
-                }
-                </script>
-                ';
-            } else {
-                echo '
-                <script>
-                ohSnap("Haocurridounerror", {color: "red"});
-                </script>
-                ';
-            }
+            $this->notificarResultadoEvaluacion('evaluación', $guardar, $datos['id_proveedor'], $total);
         }
+    }
+
+    public function registrarReevaluacionControl()
+    {
+        if (
+            $_SERVER['REQUEST_METHOD'] == 'POST' &&
+            isset($_POST['id_log']) &&
+            !empty($_POST['id_log'])
+        ) {
+            $suma  = $_POST['pregunta_1'] + $_POST['pregunta_2'] + $_POST['pregunta_3'] + $_POST['pregunta_4'] + $_POST['pregunta_5'];
+            $total = $suma / 5;
+
+            $datos = array(
+                'id_proveedor'     => $_POST['id_proveedor'],
+                'periodo'          => $_POST['periodo'],
+                'fecha_evaluacion' => $_POST['fecha_evaluacion'],
+                'evaluador'        => $_POST['evaluador'],
+                'pregunta_1'       => $_POST['pregunta_1'],
+                'pregunta_2'       => $_POST['pregunta_2'],
+                'pregunta_3'       => $_POST['pregunta_3'],
+                'pregunta_4'       => $_POST['pregunta_4'],
+                'pregunta_5'       => $_POST['pregunta_5'],
+                'observacion_1'    => $_POST['observacion_1'],
+                'observacion_2'    => $_POST['observacion_2'],
+                'observacion_3'    => $_POST['observacion_3'],
+                'observacion_4'    => $_POST['observacion_4'],
+                'observacion_5'    => $_POST['observacion_5'],
+                'total'            => $total,
+                'id_log'           => $_POST['id_log'],
+            );
+
+            $guardar = ModeloProovedor::registrarReevaluacionModel($datos);
+            $this->notificarResultadoEvaluacion('reevaluación', $guardar, $datos['id_proveedor'], $total);
+        }
+    }
+
+    private function notificarResultadoEvaluacion($tipo, $guardar, $id_proveedor, $total)
+    {
+        if ($guardar == true) {
+
+            $datos_proveedor = $this->mostrarDatosProveedorIdControl($id_proveedor);
+
+            $mensaje = '
+            <div>
+            <p style="font-size: 1.6em;">
+            Señores <b>' . $datos_proveedor['nombre'] . '</b>:
+            </p>
+            Cordial saludo,
+            <p>
+            Compartimos con ustedes el resultado de la ' . $tipo . ' de desempeño como proveedor:
+            <b>' . round($total, 2) . ' / 5 (' . round($total * 20, 1) . '%) - ' . self::criterioEvaluacion($total) . '</b>
+            </p>
+            <p style="font-size: 1.2em;">
+            Cordialmente,<br>
+            <b>Gestión de compras</b>
+            </p>
+            </div>
+            ';
+
+            $datos_correo = array(
+                'asunto'  => 'Resultado ' . $tipo . ' de proveedor',
+                'para'    => array('jrodriguez@colegiohebreounion.edu.co'),
+                'correo'  => array_filter(array('jrodriguez@colegiohebreounion.edu.co', 'sami@colegiohebreounion.edu.co', $datos_proveedor['correo'])),
+                'user'    => 'Administrador',
+                'mensaje' => $mensaje,
+                'archivo' => array(''),
+            );
+
+            $enviar_correo = Correo::enviarCorreoModel($datos_correo);
+
+            if($enviar_correo){
+                echo '<script>console.log("Correo enviado correctamente.");</script>';
+            }else{
+                echo '<script>console.log("Error al enviar el correo.");</script>';
+            }
+
+            echo '
+            <script>
+            ohSnap("Guardadocorrectamente!", {color: "green", "duration": "1000"});
+            setTimeout(recargarPagina,1050);
+
+            function recargarPagina(){
+                window.location.replace("index");
+            }
+            </script>
+            ';
+        } else {
+            echo '
+            <script>
+            ohSnap("Haocurridounerror", {color: "red"});
+            </script>
+            ';
+        }
+    }
+
+    // Misma escala que hojaRegistro: promedio 1-5
+    public static function criterioEvaluacion($total)
+    {
+        if ($total >= 4.5) {
+            return 'Muy confiable';
+        } elseif ($total >= 4.0) {
+            return 'Confiable';
+        } elseif ($total >= 3.6) {
+            return 'Aceptable';
+        }
+        return 'No confiable';
+    }
+
+    public function validarReevaluacionProveedorControl($id)
+    {
+        return ModeloProovedor::validarReevaluacionProveedorModel($id);
+    }
+
+    public function mostrarReevaluacionesProveedorControl($id)
+    {
+        return ModeloProovedor::mostrarReevaluacionesProveedorModel($id);
+    }
+
+    public function mostrarEvaluadosAnioControl()
+    {
+        return ModeloProovedor::mostrarEvaluadosAnioModel();
+    }
+
+    public function mostrarEvaluacionPdfControl($tipo, $id)
+    {
+        $tabla = ($tipo == 'reevaluacion') ? 'proveedor_reevaluacion' : 'proveedor_evaluacion';
+        return ModeloProovedor::mostrarEvaluacionPdfModel($tabla, $id);
     }
 
     public function eliminarContactoControl()
@@ -652,4 +723,11 @@ class ControlProveedor
         }
     }
 
+}
+
+function badgeCriterioEvaluacion($total)
+{
+    $colores = array('Muy confiable' => 'primary', 'Confiable' => 'success', 'Aceptable' => 'warning', 'No confiable' => 'danger');
+    $criterio = ControlProveedor::criterioEvaluacion($total);
+    return '<span class="badge badge-' . $colores[$criterio] . ' p-2">' . $criterio . '</span>';
 }
