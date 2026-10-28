@@ -877,8 +877,9 @@ class ModeloSolicitud extends conexion
         $params = array();
 
         if (!empty($datos['buscar'])) {
-            $where[] = "s.justificacion LIKE :buscar";
+            $where[] = "(s.justificacion LIKE :buscar OR s.id = :buscar_id)";
             $params[':buscar'] = '%' . $datos['buscar'] . '%';
+            $params[':buscar_id'] = ltrim($datos['buscar'], '#');
         }
 
         if (!empty($datos['fecha'])) {
