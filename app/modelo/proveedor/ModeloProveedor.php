@@ -378,8 +378,8 @@ class ModeloProovedor extends conexion
         $cnx    = conexion::singleton_conexion();
         $cmdsql = "SELECT SQL_NO_CACHE u.*, p.*,
         p.nombre AS razon_social,
-        (SELECT c.nombre_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1) AS contacto,
-        (SELECT c.telefono_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1) AS telefono_contacto
+        (SELECT c.nombre_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1 ORDER BY c.id DESC LIMIT 1) AS contacto,
+        (SELECT c.telefono_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1 ORDER BY c.id DESC LIMIT 1) AS telefono_contacto
         FROM " . $tabla . " u
         INNER JOIN proveedor_detalle p ON p.id_proveedor = u.id_user
         WHERE perfil  = 17 ORDER BY u.id_user DESC;";
@@ -404,8 +404,8 @@ class ModeloProovedor extends conexion
         $cnx    = conexion::singleton_conexion();
         $cmdsql = "SELECT SQL_NO_CACHE u.*, p.*,
         p.nombre AS razon_social,
-        (SELECT c.nombre_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1) AS contacto,
-        (SELECT c.telefono_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1) AS telefono_contacto
+        (SELECT c.nombre_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1 ORDER BY c.id DESC LIMIT 1) AS contacto,
+        (SELECT c.telefono_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1 ORDER BY c.id DESC LIMIT 1) AS telefono_contacto
         FROM " . $tabla . " u
         INNER JOIN proveedor_detalle p ON p.id_proveedor = u.id_user
         WHERE perfil  = 17 ORDER BY u.id_user DESC;";
@@ -430,8 +430,8 @@ class ModeloProovedor extends conexion
         $cnx    = conexion::singleton_conexion();
         $cmdsql = "SELECT SQL_NO_CACHE u.*, p.*,
         p.nombre AS razon_social,
-        (SELECT c.nombre_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1) AS contacto,
-        (SELECT c.telefono_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1) AS telefono_contacto
+        (SELECT c.nombre_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1 ORDER BY c.id DESC LIMIT 1) AS contacto,
+        (SELECT c.telefono_contacto FROM proveedor_contactos c WHERE c.id_proveedor = u.id_user AND c.activo = 1 ORDER BY c.id DESC LIMIT 1) AS telefono_contacto
         FROM " . $tabla . " u
         INNER JOIN proveedor_detalle p ON p.id_proveedor = u.id_user
         WHERE perfil  = 17 AND CONCAT(p.num_identificacion, ' ', p.nombre, ' ', p.correo, ' ', p.direccion, ' ', p.ciudad) LIKE '%" . $buscar . "%';";
