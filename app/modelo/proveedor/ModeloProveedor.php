@@ -634,17 +634,18 @@ class ModeloProovedor extends conexion
         $cnx = null;
     }
 
-    public static function mostrarEvaluadosAnioModel()
+    public static function mostrarEvaluadosAnioModel($anio = null)
     {
         $cnx    = conexion::singleton_conexion();
         $cmdsql = "SELECT SQL_NO_CACHE pe.*, pd.nombre, pd.num_identificacion
         FROM proveedor_evaluacion pe
         LEFT JOIN proveedor_detalle pd ON pd.id_proveedor = pe.id_proveedor
-        WHERE YEAR(pe.fecha_evaluacion) = YEAR(NOW())
+        WHERE YEAR(pe.fecha_evaluacion) = :anio
         ORDER BY pd.nombre";
         try {
             $preparado = $cnx->preparar($cmdsql);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
+            $preparado->bindValue(':anio', $anio ?: date('Y'), PDO::PARAM_INT);
             if ($preparado->execute()) {
                 return $preparado->fetchAll();
             } else {

@@ -23,7 +23,11 @@ if (!$permisos) {
 	exit();
 }
 
-$evaluados_anio = $instancia->mostrarEvaluadosAnioControl();
+$anios          = ControlProveedor::rangoAniosEvaluacion();
+$anio           = (int) ($_GET['anio'] ?? 0);
+$anio           = in_array($anio, $anios) ? $anio : (int) date('Y');
+$evaluados_anio = $instancia->mostrarEvaluadosAnioControl($anio);
+$promedio       = (count($evaluados_anio) > 0) ? array_sum(array_column($evaluados_anio, 'total')) / count($evaluados_anio) : 0;
 ?>
 <div class="container-fluid">
 	<div class="row">
@@ -35,10 +39,38 @@ $evaluados_anio = $instancia->mostrarEvaluadosAnioControl();
 							<i class="fa fa-arrow-left text-hebreo"></i>
 						</a>
 						&nbsp;
-						Proveedores evaluados <?=date('Y')?>
+						Proveedores evaluados <?=$anio?>
 					</h4>
 				</div>
 				<div class="card-body">
+					<div class="row align-items-center mb-3">
+						<div class="col-lg-4">
+							<div class="card shadow-sm border-0 border-left-primary">
+								<div class="card-body d-flex align-items-center">
+									<div class="mr-3">
+										<i class="fas fa-chart-line fa-2x text-hebreo"></i>
+									</div>
+									<div>
+										<h6 class="font-weight-bold mb-1">Evaluación global de proveedores <?=$anio?></h6>
+										<h3 class="font-weight-bold text-hebreo mb-0">
+											<?=number_format($promedio, 2)?> / 5 (<?=number_format($promedio * 20, 1)?>%)
+										</h3>
+										<small class="text-muted">Promedio de <?=count($evaluados_anio)?> evaluaciones</small>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-2 offset-lg-6">
+							<form method="GET">
+								<label for="anio" class="font-weight-bold">Año de evaluación</label>
+								<select name="anio" id="anio" class="form-control" onchange="this.form.submit()">
+									<?php foreach ($anios as $a) { ?>
+										<option value="<?=$a?>" <?=($a == $anio) ? 'selected' : ''?>><?=$a?></option>
+									<?php } ?>
+								</select>
+							</form>
+						</div>
+					</div>
 					<div class="table-responsive mt-2">
 						<table class="table table-hover table-sm border" width="100%" cellspacing="0">
 							<thead>

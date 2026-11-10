@@ -685,9 +685,9 @@ class ControlProveedor
         return ModeloProovedor::mostrarReevaluacionesProveedorModel($id);
     }
 
-    public function mostrarEvaluadosAnioControl()
+    public function mostrarEvaluadosAnioControl($anio = null)
     {
-        return ModeloProovedor::mostrarEvaluadosAnioModel();
+        return ModeloProovedor::mostrarEvaluadosAnioModel($anio);
     }
 
     public function mostrarEvaluacionPdfControl($tipo, $id)
