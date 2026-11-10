@@ -405,12 +405,13 @@ if (isset($_GET['proveedor'])) {
 									<table class="table table-hover border" width="100%" cellspacing="0">
 										<thead>
 											<tr class="text-center font-weight-bold">
-												<th colspan="3">
+												<th colspan="5">
 													EVALUACIONES REALIZADAS
 												</th>
 											</tr>
 											<tr class="text-center font-weight-bold">
 												<th>Año evaluado</th>
+												<th>Fecha de evaluacion</th>
 												<th>Calificacion total</th>
 												<th>Criterio de confiabilidad</th>
 												<th>Detalles</th>
@@ -420,13 +421,14 @@ if (isset($_GET['proveedor'])) {
 											<?php
 											foreach ($calificacion_proveedor as $calificacion) {
 												$id_calificacion = $calificacion['id'];
-												$anio_evaluado   = date('Y', strtotime($calificacion['fecha_evaluacion']));
+												$anio_evaluado   = $calificacion['anio'];
 												$total           = $calificacion['total'];
 
 												$badge = badgeCriterioEvaluacion($total);
 												?>
 												<tr class="text-center text-dark">
 													<td><?=$anio_evaluado?></td>
+													<td><?=$calificacion['fecha_evaluacion']?></td>
 													<td><?=$total?></td>
 													<td><?=$badge?></td>
 													<td>
@@ -448,11 +450,12 @@ if (isset($_GET['proveedor'])) {
 									<table class="table table-hover border" width="100%" cellspacing="0">
 										<thead>
 											<tr class="text-center font-weight-bold">
-												<th colspan="5">
+												<th colspan="6">
 													REEVALUACIONES REALIZADAS
 												</th>
 											</tr>
 											<tr class="text-center font-weight-bold">
+												<th>Año evaluado</th>
 												<th>Fecha</th>
 												<th>Periodo</th>
 												<th>Calificacion total</th>
@@ -465,6 +468,7 @@ if (isset($_GET['proveedor'])) {
 											foreach ($reevaluaciones_proveedor as $reevaluacion) {
 												?>
 												<tr class="text-center text-dark">
+													<td><?=$reevaluacion['anio']?></td>
 													<td><?=$reevaluacion['fecha_evaluacion']?></td>
 													<td><?=$reevaluacion['periodo']?></td>
 													<td><?=$reevaluacion['total']?></td>

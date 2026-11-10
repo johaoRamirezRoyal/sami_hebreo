@@ -83,6 +83,10 @@ $datos = '
 <td><b>Evaluador:</b> ' . $evaluacion['nom_evaluador'] . '</td>
 ' . $fila_periodo . '
 </tr>
+<tr>
+<td><b>Año evaluado:</b> ' . $evaluacion['anio'] . '</td>
+<td></td>
+</tr>
 </table>
 ';
 

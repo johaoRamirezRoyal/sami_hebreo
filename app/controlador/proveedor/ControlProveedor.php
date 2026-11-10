@@ -647,6 +647,34 @@ class ControlProveedor
         return 'No confiable';
     }
 
+    // Años del select: 3 antes y 2 después del actual
+    public static function rangoAniosEvaluacion()
+    {
+        $anio_actual = (int) date('Y');
+        return range($anio_actual - 3, $anio_actual + 2);
+    }
+
+    // Años del rango que se pueden usar.
+    // Evaluación: los que aún no tienen evaluación (año de fecha_evaluacion).
+    // Reevaluación: los que tienen evaluación por debajo de "Confiable" (< 4.0).
+    public function aniosDisponiblesEvaluacionControl($id_proveedor, $es_reevaluacion = false)
+    {
+        $evaluaciones = ModeloProovedor::mostrarCalificacionProveedorModel($id_proveedor) ?: array();
+
+        $evaluados = array();
+        $bajos     = array();
+        foreach ($evaluaciones as $evaluacion) {
+            $evaluados[] = (int) $evaluacion['anio'];
+            if ($evaluacion['total'] < 4.0) {
+                $bajos[] = (int) $evaluacion['anio'];
+            }
+        }
+
+        $rango = self::rangoAniosEvaluacion();
+        $anios = ($es_reevaluacion) ? array_intersect($rango, $bajos) : array_diff($rango, $evaluados);
+        return array_values($anios);
+    }
+
     public function validarReevaluacionProveedorControl($id)
     {
         return ModeloProovedor::validarReevaluacionProveedorModel($id);

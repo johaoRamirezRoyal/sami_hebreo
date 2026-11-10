@@ -35,6 +35,7 @@ if (isset($_GET['proveedor'])) {
 	$es_reevaluacion = (isset($_GET['tipo']) && $_GET['tipo'] == 'reevaluacion');
 
 	$datos_proveedor = $instancia->mostrarDatosProveedorIdControl($id_proveedor);
+	$anios_disponibles = $instancia->aniosDisponiblesEvaluacionControl($id_proveedor, $es_reevaluacion);
 	?>
 	<div class="container-fluid">
 		<div class="row">
@@ -55,6 +56,28 @@ if (isset($_GET['proveedor'])) {
 						<input type="hidden" name="id_proveedor" value="<?=$id_proveedor?>">
 						<div class="card-body">
 							<div class="row p-2">
+								<?php if (empty($anios_disponibles)) { ?>
+								<div class="col-lg-12">
+									<div class="alert alert-warning">
+										<?=($es_reevaluacion) ? 'No hay años con evaluación por debajo de 4.0 para reevaluar.' : 'Todos los años ya están evaluados.'?>
+									</div>
+								</div>
+								<?php } ?>
+								<div class="form-group col-lg-4">
+									<label class="font-weight-bold">Año a evaluar <span class="text-danger">*</span></label>
+									<!-- El año se guarda en fecha_evaluacion: este select solo limita esa fecha al año elegido -->
+									<select class="form-control" id="anio_evaluar" required onchange="var f = document.getElementById('fecha_evaluacion'); f.min = this.value + '-01-01'; f.max = this.value + '-12-31'; if (f.value.substr(0, 4) !== this.value) f.value = '';">
+										<?php
+										// Por defecto el año actual; si ya no se puede usar, el primer año disponible
+										$anio_defecto = in_array((int) date('Y'), $anios_disponibles, true) ? (int) date('Y') : (reset($anios_disponibles) ?: (int) date('Y'));
+										foreach (ControlProveedor::rangoAniosEvaluacion() as $anio) {
+											$disponible = in_array($anio, $anios_disponibles, true);
+											$motivo     = ($es_reevaluacion) ? ' (sin evaluación menor a 4.0)' : ' (ya evaluado)';
+											?>
+										<option value="<?=$anio?>" <?=($anio == $anio_defecto) ? 'selected' : ''?> <?=($disponible) ? '' : 'disabled'?>><?=$anio . (($disponible) ? '' : $motivo)?></option>
+										<?php } ?>
+									</select>
+								</div>
 								<?php if ($es_reevaluacion) { ?>
 								<div class="form-group col-lg-4">
 									<label class="font-weight-bold">Periodo <span class="text-danger">*</span></label>
@@ -76,7 +99,7 @@ if (isset($_GET['proveedor'])) {
 								<?php } ?>
 								<div class="form-group col-lg-4">
 									<label class="font-weight-bold">Fecha de evaluacion <span class="text-danger">*</span></label>
-									<input type="date" name="fecha_evaluacion" class="form-control" required>
+									<input type="date" name="fecha_evaluacion" id="fecha_evaluacion" class="form-control" required min="<?=$anio_defecto?>-01-01" max="<?=$anio_defecto?>-12-31">
 								</div>
 								<div class="form-group col-lg-4">
 									<label class="font-weight-bold">Evaluador <span class="text-danger">*</span></label>
@@ -193,7 +216,7 @@ if (isset($_GET['proveedor'])) {
 						<div class="card-footer border-0 bg-transparent">
 							<div class="row p-2">
 								<div class="form-group col-lg-12 text-right">
-									<button type="submit" class="btn btn-primary btn-sm">
+									<button type="submit" class="btn btn-primary btn-sm <?=(empty($anios_disponibles)) ? 'd-none' : ''?>">
 										<i class="fa fa-save"></i>
 										&nbsp;
 										Guardar
@@ -210,7 +233,9 @@ if (isset($_GET['proveedor'])) {
 	include_once VISTA_PATH . 'script_and_final.php';
 
 	if (isset($_POST['id_log'])) {
-		if ($es_reevaluacion) {
+		if (!in_array((int) date('Y', strtotime($_POST['fecha_evaluacion'])), $anios_disponibles, true)) {
+			echo '<script>ohSnap("El año seleccionado no está disponible para evaluar", {color: "red"});</script>';
+		} elseif ($es_reevaluacion) {
 			$instancia->registrarReevaluacionControl();
 		} else {
 			$instancia->registrarEvaluacionAnualControl();

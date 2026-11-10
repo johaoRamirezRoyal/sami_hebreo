@@ -475,7 +475,7 @@ class ModeloProovedor extends conexion
     {
         $tabla  = 'proveedor_evaluacion';
         $cnx    = conexion::singleton_conexion();
-        $cmdsql = "SELECT SQL_NO_CACHE * FROM " . $tabla . " WHERE id_proveedor = :id AND DATE_FORMAT(fechareg,'%Y') = " . date('Y') . ";";
+        $cmdsql = "SELECT SQL_NO_CACHE * FROM " . $tabla . " WHERE id_proveedor = :id AND YEAR(fecha_evaluacion) = YEAR(NOW());";
         try {
             $preparado = $cnx->preparar($cmdsql);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
@@ -496,7 +496,7 @@ class ModeloProovedor extends conexion
     {
         $tabla  = 'proveedor_evaluacion';
         $cnx    = conexion::singleton_conexion();
-        $cmdsql = "SELECT SQL_NO_CACHE * FROM " . $tabla . " WHERE id_proveedor = :id";
+        $cmdsql = "SELECT SQL_NO_CACHE *, YEAR(fecha_evaluacion) AS anio FROM " . $tabla . " WHERE id_proveedor = :id ORDER BY fecha_evaluacion DESC";
         try {
             $preparado = $cnx->preparar($cmdsql);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
@@ -597,7 +597,7 @@ class ModeloProovedor extends conexion
     public static function validarReevaluacionProveedorModel($id)
     {
         $cnx    = conexion::singleton_conexion();
-        $cmdsql = "SELECT SQL_NO_CACHE * FROM proveedor_reevaluacion WHERE id_proveedor = :id AND YEAR(fechareg) = YEAR(NOW()) ORDER BY id DESC LIMIT 1";
+        $cmdsql = "SELECT SQL_NO_CACHE * FROM proveedor_reevaluacion WHERE id_proveedor = :id AND YEAR(fecha_evaluacion) = YEAR(NOW()) ORDER BY id DESC LIMIT 1";
         try {
             $preparado = $cnx->preparar($cmdsql);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
@@ -617,7 +617,7 @@ class ModeloProovedor extends conexion
     public static function mostrarReevaluacionesProveedorModel($id)
     {
         $cnx    = conexion::singleton_conexion();
-        $cmdsql = "SELECT SQL_NO_CACHE * FROM proveedor_reevaluacion WHERE id_proveedor = :id ORDER BY id DESC";
+        $cmdsql = "SELECT SQL_NO_CACHE *, YEAR(fecha_evaluacion) AS anio FROM proveedor_reevaluacion WHERE id_proveedor = :id ORDER BY fecha_evaluacion DESC, id DESC";
         try {
             $preparado = $cnx->preparar($cmdsql);
             $preparado->setFetchMode(PDO::FETCH_ASSOC);
@@ -640,7 +640,7 @@ class ModeloProovedor extends conexion
         $cmdsql = "SELECT SQL_NO_CACHE pe.*, pd.nombre, pd.num_identificacion
         FROM proveedor_evaluacion pe
         LEFT JOIN proveedor_detalle pd ON pd.id_proveedor = pe.id_proveedor
-        WHERE YEAR(pe.fechareg) = YEAR(NOW())
+        WHERE YEAR(pe.fecha_evaluacion) = YEAR(NOW())
         ORDER BY pd.nombre";
         try {
             $preparado = $cnx->preparar($cmdsql);
@@ -661,7 +661,7 @@ class ModeloProovedor extends conexion
     public static function mostrarEvaluacionPdfModel($tabla, $id)
     {
         $cnx    = conexion::singleton_conexion();
-        $cmdsql = "SELECT SQL_NO_CACHE e.*, pd.nombre AS nom_proveedor, pd.num_identificacion,
+        $cmdsql = "SELECT SQL_NO_CACHE e.*, YEAR(e.fecha_evaluacion) AS anio, pd.nombre AS nom_proveedor, pd.num_identificacion,
         CONCAT(u.nombre, ' ', u.apellido) AS nom_evaluador
         FROM " . $tabla . " e
         LEFT JOIN proveedor_detalle pd ON pd.id_proveedor = e.id_proveedor

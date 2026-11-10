@@ -129,14 +129,17 @@ $promedio_evaluados = (count($evaluados_anio) > 0) ? array_sum(array_column($eva
 
 									$reevaluacion_proveedor = $instancia->validarReevaluacionProveedorControl($id_proveedor) ?: array();
 
-									$ver_evaluacion = (empty($evaluacion_proveedor) && $documentos_proveedor['contar'] >= 3) ? '' : 'd-none';
+									// Se puede evaluar cualquier año pendiente del rango (actual -3 a +2), no solo el actual
+									$anios_pendientes = $instancia->aniosDisponiblesEvaluacionControl($id_proveedor);
+									$ver_evaluacion = (!empty($anios_pendientes) && $documentos_proveedor['contar'] >= 3) ? '' : 'd-none';
 
 									// Como en Royal: se reevalúa si la evaluación del año no llega a "Confiable" (< 4.0)
 									// y no hay reevaluación, o la última tampoco llegó
 									$ver_reevaluacion = (!empty($evaluacion_proveedor) && $evaluacion_proveedor['total'] < 4.0
 										&& (empty($reevaluacion_proveedor) || $reevaluacion_proveedor['total'] < 4.0)) ? '' : 'd-none';
 
-									if (!empty($reevaluacion_proveedor)) {
+									// Evaluado = tiene evaluación con fecha_evaluacion en el año actual
+									if (!empty($evaluacion_proveedor) && !empty($reevaluacion_proveedor)) {
 										$estado_evaluacion = '<span class="badge badge-info">Reevaluado - ' . round($reevaluacion_proveedor['total'], 2) . '</span>';
 									} elseif (!empty($evaluacion_proveedor)) {
 										$estado_evaluacion = '<span class="badge badge-success">Evaluación realizada - ' . round($evaluacion_proveedor['total'], 2) . '</span>';
@@ -161,7 +164,7 @@ $promedio_evaluados = (count($evaluados_anio) > 0) ? array_sum(array_column($eva
 												<a href="<?=BASE_URL?>proveedor/hojaRegistro?proveedor=<?=base64_encode($id_proveedor)?>" class="btn btn-info btn-sm" data-tooltip="tooltip" title="Ver hoja de registro" data-placement="bottom" data-trigger="hover">
 													<i class="fa fa-eye"></i>
 												</a>
-												<a href="<?=BASE_URL?>proveedor/evaluacion?proveedor=<?=base64_encode($id_proveedor)?>" class="btn btn-success btn-sm <?=$ver_evaluacion?>" data-tooltip="tooltip" data-placement="bottom" title="Evaluacion (<?=date('Y')?>)">
+												<a href="<?=BASE_URL?>proveedor/evaluacion?proveedor=<?=base64_encode($id_proveedor)?>" class="btn btn-success btn-sm <?=$ver_evaluacion?>" data-tooltip="tooltip" data-placement="bottom" title="Evaluacion">
 													<i class="fas fa-clipboard-list"></i>
 												</a>
 												<a href="<?=BASE_URL?>proveedor/evaluacion?proveedor=<?=base64_encode($id_proveedor)?>&tipo=reevaluacion" class="btn btn-warning btn-sm <?=$ver_reevaluacion?>" data-tooltip="tooltip" data-placement="bottom" title="Reevaluacion (<?=date('Y')?>)">
